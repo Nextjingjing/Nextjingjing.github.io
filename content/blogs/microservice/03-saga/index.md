@@ -97,7 +97,7 @@ sequenceDiagram
     
     Note over S1,S4: System back to Consistent State
 ```
-จากภาพจะเห็นว่าลำดับการทำงานของ SAGA คือ Order, Stock, Payment, Shipping แต่ที่ Shipping เกิดล้มเหลวขึ้นมา ลำดับการชดเชยจึงเป็น Payment, Stock, Order **เป็นลำดับย้อน (Reverse Order)**
+จากภาพจะเห็นว่าลำดับการทำงานของ SAGA คือ Order, Stock, Payment, Shipping แต่ที่ Shipping เกิดล้มเหลวขึ้นมา ลำดับการชดเชยจึงเป็น Payment, Stock, Order **เป็นลำดับย้อน (Reverse Order)** โดยจะส่งข้อความกลับไปหา Service ตัวก่อนๆ ให้ทำการชดเชย Record
 
 > **Important Note** 📝:
 >

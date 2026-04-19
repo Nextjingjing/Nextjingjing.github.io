@@ -1,6 +1,6 @@
 ---
 title: Microservice ตอนที่ 4 Queries in Microservice
-description: Microservice ตอนที่ 4 การ Query ใน
+description: Microservice ตอนที่ 4 การ Query ใน Microservice
 date: 2026-04-11
 categories:
     - Blogs
@@ -55,7 +55,7 @@ toc: true
   - เช่น การค้นหาสถานที่สักอย่างใกล้ฉัน (Geo-spatial Query) มันเป็นภาระที่หนักมากๆ ทีม dev จึงนิยมแยกมันไปอยู่อีก Service ไปเลย
 
 ### ลักษณะ
-> Aggregate เราจะกล่าวกันต่อในบทหลังๆ
+> Aggregate เราจะกล่าวกันต่อในบทหลังๆ อันนี้ไม่ใช่นิยามของมันที่ถูกต้อง แต่เพื่อให้เข้าง่ายๆ มอง Aggregate เป็น Database schema ไปก่อนก็ได้
 
 ```mermaid
 graph TD
@@ -176,5 +176,31 @@ graph LR
 #### ป้องกัน Concurrency ใน Record เดียวกัน
 - ใช้ Pessimistic locking เช่น `SELECT ... FOR UPDATE;`
 - ใช้ Optimistic locking เช็คว่า Version ตรงกับปัจจุบันหากไม่ตรงแสดงว่ามีคนเขียนก่อนเรา เช่น `WHERE version = current_version`
+
+#### การเพิ่มและอัพเดต CQRS
+ในวงจรการพัฒนามีโอกาสที่ต้องเพิ่มหรืออัพเดต CQRS เช่น อยากเปลี่ยน Database ฝั่ง Query-side เป็นต้น ต้องพิจารณาประเด็นดังต่อไปนี้
+- ต้องมีการเก็บประวัติของ Events เก็บไว้ทั้งหมดใน Event store เพราะ Message broker ของ Event handler จะไม่ค่อยเก็บประวัติ เช่น Kafka จะเก็บไว้ชั่วคราว ไม่ถาวร
+  - เมื่อเกิดการเพิ่มหรืออัพเดต อาจจะทำให้ต้องมา **Replay** Events ใหม่บ้าง การเก็บประวัติจึงสำคัญ
+
+#### การ Replay events ให้มีประสิทธิภาพ
+
+> **Important Note** 📝:
+>
+> *การ Replay Event ต้องทำ Event store ก่อนด้วยนะ* เพราะ Message Broker ที่คุณใช้อาจจะเป็น Stateless
+>
+> ทำไมต้อง Replay events?
+> 1. เพื่อเปลี่ยน Query database
+>     - เช่น เปลี่ยนจาก SQL เป็น No-SQL จำเป็นต้อง Replay events ใหม่ทั้งหมด
+> 2. เพื่อรับประกันว่าเมื่อการแก้ไขข้อมูลจะสามารถย้อนกลับได้เมื่อทำผิด
+>     - เช่น เมื่อแก้ไขการคำนวณใหม่ของอะไรสักอย่าง แล้วจำเป็นต้องลบข้อมูลเก่า ต้อง Replay events และใช้สูตรใหม่นั้น เป็นต้น
+> 3. เพื่อให้สามารถเพิ่ม Feature ใหม่ๆ โดยเมื่อทำผิดสามารถย้อนกลับไปได้
+>     - เช่น อยากทำระบบ Search ด้วย Elasticsearch ก็แค่ Reply events มาให้ Elasticsearch ไปทำงานต่อ
+
+บางครั้ง Event อาจจะมีจำนวนเยอะเกินจนการ Replay ทุกๆ Events อาจจะทำได้นานมากๆ ในบางครั้งเราอยาก Replay events แค่ภายใน 1 เดือน จะให้ Replay ทั้งหมดก็คงเสียเวลา  จึงมีอัลกอริทึมที่ช่วยให้เร็วขึ้นดัง 2 วิธีต่อไป
+
+1. เก็บ Snapshot เวอร์ชั่นปัจจุบันโดยต่อยอดจาก Snapshot เก่าๆ + Events ที่ไม่มีใน snapshot เพื่ออัพเดต โดยทำเป็นระยะๆ
+2. นำ Snapshot ไปสร้าง Database ของฝั่ง Query-side + Event ที่ไม่มีใน snapshot เพื่ออัพเดต  
+
+> การ Replay events และ Event store เรื่องนี้เกี่ยวกับ Event Sourcing ซึ่งจะเป็นบทถัดไปนี้ 
 
 {{< page-nav prev-link="../03-saga/" next-link="../04-query/">}}
