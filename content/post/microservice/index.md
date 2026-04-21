@@ -23,8 +23,10 @@ Microservice คือสถาปัตยกรรมที่แบ่งร�
 
 [บทที่ 2: Inter process communication](../../blogs/microservice/02-ipc/)
 
-[บทที่ 3: การจัดการกับ Transaction ด้วย SAGA pattern](../../blogs/microservice/03-saga/)
+[บทที่ 3: การจัดการกับ Transaction ด้วย Saga pattern](../../blogs/microservice/03-saga/)
 
 [บทที่ 4: การจัดการกับ Query](../../blogs/microservice/04-query/)
+
+[บทที่ 5: การออกแบบ Business logic และ Service ด้วย Domain Driven Design ](../../blogs/microservice/04-query/)
 
 {{< page-nav prev-link="/../" next-link="../../blogs/microservice/01-introduction/">}}

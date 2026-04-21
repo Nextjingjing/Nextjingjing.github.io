@@ -56,6 +56,8 @@ toc: true
 
 ### ลักษณะ
 > Aggregate เราจะกล่าวกันต่อในบทหลังๆ อันนี้ไม่ใช่นิยามของมันที่ถูกต้อง แต่เพื่อให้เข้าง่ายๆ มอง Aggregate เป็น Database schema ไปก่อนก็ได้
+> 
+> ซึ่งเราจะเรียนแบบจริงจังในบทที่ 5
 
 ```mermaid
 graph TD
@@ -201,6 +203,6 @@ graph LR
 1. เก็บ Snapshot เวอร์ชั่นปัจจุบันโดยต่อยอดจาก Snapshot เก่าๆ + Events ที่ไม่มีใน snapshot เพื่ออัพเดต โดยทำเป็นระยะๆ
 2. นำ Snapshot ไปสร้าง Database ของฝั่ง Query-side + Event ที่ไม่มีใน snapshot เพื่ออัพเดต  
 
-> การ Replay events และ Event store เรื่องนี้เกี่ยวกับ Event Sourcing ซึ่งจะเป็นบทถัดไปนี้ 
+> การ Replay events และ Event store เรื่องนี้เกี่ยวกับ Event Sourcing ซึ่งจะเป็นบทที่ 6
 
 {{< page-nav prev-link="../03-saga/" next-link="../04-query/">}}

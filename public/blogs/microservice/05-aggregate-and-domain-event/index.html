@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="ความรู้ดีๆ สำหรับศึกษาการทำ Microservice">
-<title>Microservice</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Microservice ตอนที่ 5 Aggregate และ Domain event">
+<title>Microservice ตอนที่ 5 Aggregate และ Domain event</title>
 
 
-<link rel="canonical" href="http://localhost:1313/post/microservice/">
+<link rel="canonical" href="http://localhost:1313/blogs/microservice/05-aggregate-and-domain-event/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
 
 
-<link rel="stylesheet" href="/scss/style.min.4df4c8522cc0ad28c20cdfcea7f6cfa3a509d0c92276499cf4ceb49306afe6a1.css"><meta property='og:title' content="Microservice">
-<meta property='og:description' content="ความรู้ดีๆ สำหรับศึกษาการทำ Microservice">
-<meta property='og:url' content='http://localhost:1313/post/microservice/'>
+<link rel="stylesheet" href="/scss/style.min.4df4c8522cc0ad28c20cdfcea7f6cfa3a509d0c92276499cf4ceb49306afe6a1.css"><meta property='og:title' content="Microservice ตอนที่ 5 Aggregate และ Domain event">
+<meta property='og:description' content="Microservice ตอนที่ 5 Aggregate และ Domain event">
+<meta property='og:url' content='http://localhost:1313/blogs/microservice/05-aggregate-and-domain-event/'>
 <meta property='og:site_name' content='Nextjingjing'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Microservice' /><meta property='article:tag' content='Backend' /><meta property='article:published_time' content='2026-03-30T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-03-30T00:00:00&#43;00:00'/><meta property='og:image' content='http://localhost:1313/' />
-<meta name="twitter:title" content="Microservice">
-<meta name="twitter:description" content="ความรู้ดีๆ สำหรับศึกษาการทำ Microservice"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='http://localhost:1313/' />
+<meta property='og:type' content='article'><meta property='article:section' content='Blogs' /><meta property='article:tag' content='Microservice' /><meta property='article:tag' content='Backend' /><meta property='article:published_time' content='2026-04-18T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-04-18T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Microservice ตอนที่ 5 Aggregate และ Domain event">
+<meta name="twitter:description" content="Microservice ตอนที่ 5 Aggregate และ Domain event">
     <link rel="shortcut icon" href="/img/profile.png" />
 
     </head>
@@ -267,8 +266,7 @@
             <nav class="toc-nav" id="TableOfContents">
                 
   <ol>
-    <li><a href="#microservice-คออะไร">Microservice คืออะไร?</a></li>
-    <li><a href="#สารบญ">สารบัญ</a></li>
+    <li><a href="#ลกษณะ">ลักษณะ</a></li>
   </ol>
 
             </nav>
@@ -281,14 +279,8 @@
 
 
             <main class="main full-width">
-    <article class="has-image main-article">
+    <article class="main-article">
     <header class="article-header">
-    <div class="article-image">
-        <a href="/post/microservice/">
-            <img alt="Featured image of post Microservice" height="382" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="/post/microservice/microservice-icon.png" width="740">
-        </a>
-    </div>
-    
 
     <div class="article-details">
     
@@ -297,15 +289,8 @@
             
             
             
-            <a href="/categories/programming/" style="background-color: hsl(62, 60%, 84%); color: hsl(62, 60%, 15%);">
-                Programming
-            </a>
-        
-            
-            
-            
-            <a href="/categories/backend/" style="background-color: hsl(295, 60%, 84%); color: hsl(295, 60%, 15%);">
-                Backend
+            <a href="/categories/blogs/" style="background-color: hsl(334, 60%, 84%); color: hsl(334, 60%, 15%);">
+                Blogs
             </a>
         
     </header>
@@ -313,12 +298,12 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/post/microservice/">Microservice</a>
+            <a href="/blogs/microservice/05-aggregate-and-domain-event/">Microservice ตอนที่ 5 Aggregate และ Domain event</a>
         </h2>
     
         
         <h3 class="article-subtitle">
-            ความรู้ดีๆ สำหรับศึกษาการทำ Microservice
+            Microservice ตอนที่ 5 Aggregate และ Domain event
         </h3>
         
     </div>
@@ -343,7 +328,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                    <time class="article-time--published" datetime='2026-03-30T00:00:00Z'>Monday, March 30, 2026</time>
+                    <time class="article-time--published" datetime='2026-04-18T00:00:00Z'>Saturday, April 18, 2026</time>
                 
 
                 
@@ -383,8 +368,7 @@
             <nav class="toc-nav">
                 
   <ol>
-    <li><a href="#microservice-คออะไร">Microservice คืออะไร?</a></li>
-    <li><a href="#สารบญ">สารบัญ</a></li>
+    <li><a href="#ลกษณะ">ลักษณะ</a></li>
   </ol>
 
             </nav>
@@ -395,32 +379,10 @@
     <section class="article-content">
     
     
-    <h2 id="microservice-คออะไร">Microservice คืออะไร?
-</h2><p>Microservice คือสถาปัตยกรรมที่แบ่งระบบใหญ่ๆ ออกเป็นบริการย่อยๆ ที่เป็นอิสระต่อกัน ทำให้แยกกันพัฒนาได้ ซึ่งจะทำให้เกิดความ Maintainable เนื่องจากโค้ดมีขนาดเล็กกว่า</p>
-<p>โอเคเราควรที่จะรู้ลักษณะ, ข้อดี, ข้อเสียและข้อแตกต่างระหว่าง Monolith กับ Microservice กันดีกว่า โดยสามารถอ่านต่อได้ที่<a class="link" href="../../blogs/microservice/01-introduction/" >บทที่ 1</a></p>
-<h2 id="สารบญ">สารบัญ
-</h2><p><a class="link" href="../../blogs/microservice/01-introduction/" >บทที่ 1: Monolith vs Microservice</a></p>
-<p><a class="link" href="../../blogs/microservice/02-ipc/" >บทที่ 2: Inter process communication</a></p>
-<p><a class="link" href="../../blogs/microservice/03-saga/" >บทที่ 3: การจัดการกับ Transaction ด้วย SAGA pattern</a></p>
-<p><a class="link" href="../../blogs/microservice/04-query/" >บทที่ 4: การจัดการกับ Query</a></p>
-<div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        
-        <a href="/../" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;">
-            ← หน้าก่อนหน้า
-        </a>
-        
-    </div>
-
-    <div>
-        
-        <a href="../../blogs/microservice/01-introduction/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;">
-            ตอนถัดไป →
-        </a>
-        
-    </div>
-</div>
-
+    <h1 id="aggregate-และ-domain-event">Aggregate และ Domain event
+</h1><h1 id="aggregate">Aggregate
+</h1><h2 id="ลกษณะ">ลักษณะ
+</h2>
 </section>
 
 
@@ -465,17 +427,6 @@
             
                 
 <article class="">
-    <a href="/blogs/microservice/05-ddd/">
-        
-
-        <div class="article-details">
-            <h2 class="article-title">Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</h2>
-        </div>
-    </a>
-</article>
-            
-                
-<article class="">
     <a href="/blogs/microservice/06-event-sourcing/">
         
 
@@ -514,6 +465,17 @@
 
         <div class="article-details">
             <h2 class="article-title">Microservice ตอนที่ 2 Inter process communication (IPC)</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/01-introduction/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 1 Monolith vs Microservice</h2>
         </div>
     </a>
 </article>

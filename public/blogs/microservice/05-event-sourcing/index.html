@@ -243,7 +243,46 @@
     </ol>
 </aside>
 
-    
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav class="toc-nav" id="TableOfContents">
+                
+  <ol>
+    <li><a href="#ประเภทของการเกบขอมล">ประเภทของการเก็บข้อมูล</a></li>
+    <li><a href="#ปพนฐาน-aggregate">ปูพื้นฐาน Aggregate</a></li>
+    <li><a href="#event-sourcing-1">Event sourcing</a>
+      <ol>
+        <li><a href="#ลกษณะ">ลักษณะ</a></li>
+      </ol>
+    </li>
+  </ol>
+
+            </nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
 
             <main class="main full-width">
     <article class="main-article">
@@ -324,6 +363,30 @@
 </header>
 
     
+    <aside class="article-toc">
+        <details>
+            <summary>
+                <div class="article-toc-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
+                    <span>Table of contents</span>
+                </div>
+            </summary>
+            <nav class="toc-nav">
+                
+  <ol>
+    <li><a href="#ประเภทของการเกบขอมล">ประเภทของการเก็บข้อมูล</a></li>
+    <li><a href="#ปพนฐาน-aggregate">ปูพื้นฐาน Aggregate</a></li>
+    <li><a href="#event-sourcing-1">Event sourcing</a>
+      <ol>
+        <li><a href="#ลกษณะ">ลักษณะ</a></li>
+      </ol>
+    </li>
+  </ol>
+
+            </nav>
+        </details>
+    </aside>
+    
 
     <section class="article-content">
     
@@ -334,6 +397,89 @@
         <p>โดยปกติแล้วการบันทึกข้อมูลลงฐานข้อมูลนั้นเราจะบันทึกแค่ค่าปัจจุบันของ Record นั้นๆ แต่ปัญหาที่ตามมาคือเราจะไม่เห็นประวัติเก่าของ Record นั้นๆ ดังนั้น Event sourcing จึงมาแก้ปัญหาดังกล่าว</p>
 
     </blockquote>
+<h2 id="ประเภทของการเกบขอมล">ประเภทของการเก็บข้อมูล
+</h2><ol>
+<li>State-oriented Persistence (การเก็บสถานะปัจจุบัน) เป็นแบบที่เราคุ้นเคยเลยเก็ยสถานะปัจจุบันของข้อมูล แต่ประวัติหายหมด</li>
+</ol>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">account_id</th>
+          <th style="text-align: left">customer_name</th>
+          <th style="text-align: left">balance</th>
+          <th style="text-align: left">last_updated</th>
+          <th style="text-align: left">status</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">ACC-001</td>
+          <td style="text-align: left">Somchai Dee</td>
+          <td style="text-align: left"><strong>850.00</strong></td>
+          <td style="text-align: left">2024-05-20 10:30:00</td>
+          <td style="text-align: left">Active</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">ACC-002</td>
+          <td style="text-align: left">Somsak Range</td>
+          <td style="text-align: left"><strong>1,200.00</strong></td>
+          <td style="text-align: left">2024-05-19 14:15:00</td>
+          <td style="text-align: left">Active</td>
+      </tr>
+  </tbody>
+</table></div>
+<ol start="2">
+<li>Event Sourcing (Event-oriented Persistence) เป็นแบบที่เน้นเก็บทุกสถานะของข้อมูลลงในฐานข้อมูล แล้วค่อยนำกลับมารวมกันคำนวณเป็นสถานะปัจจุบันแทน ซึ่งข้อดีคือประวัติยังอยู่</li>
+</ol>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th style="text-align: left">event_id</th>
+          <th style="text-align: left">account_id</th>
+          <th style="text-align: left">event_type</th>
+          <th style="text-align: left">amount</th>
+          <th style="text-align: left">timestamp</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">1</td>
+          <td style="text-align: left">ACC-001</td>
+          <td style="text-align: left"><strong>AccountOpened</strong></td>
+          <td style="text-align: left">0.00</td>
+          <td style="text-align: left">2024-05-20 09:00:00</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">2</td>
+          <td style="text-align: left">ACC-001</td>
+          <td style="text-align: left"><strong>MoneyDeposited</strong></td>
+          <td style="text-align: left">1000.00</td>
+          <td style="text-align: left">2024-05-20 09:15:00</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">3</td>
+          <td style="text-align: left">ACC-001</td>
+          <td style="text-align: left"><strong>MoneyWithdrawn</strong></td>
+          <td style="text-align: left">150.00</td>
+          <td style="text-align: left">2024-05-20 10:30:00</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4</td>
+          <td style="text-align: left">ACC-001</td>
+          <td style="text-align: left"><strong>MoneyWithdrawn</strong></td>
+          <td style="text-align: left">200.00</td>
+          <td style="text-align: left">2024-05-20 11:00:00</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>ซึ่งสถานะปัจจุบันของ <code>ACC-001</code> คือ 0.00 + 1000.00 - 150.00 - 200.00 = <strong>650.00</strong></p>
+<h2 id="ปพนฐาน-aggregate">ปูพื้นฐาน Aggregate
+</h2><h2 id="event-sourcing-1">Event sourcing
+</h2><h3 id="ลกษณะ">ลักษณะ
+</h3><ul>
+<li>Event-oriented Persistence เก็บทุกสถานะแล้วนำมารวมเป็นข้อมูล</li>
+<li></li>
+</ul>
 
 </section>
 

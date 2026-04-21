@@ -580,7 +580,7 @@
     S2-->>S1: Trigger Compensation
     S1->>S1: Undo Actions (Compensate 1)
     
-    Note over S1,S4: System back to Consistent State</pre><p>จากภาพจะเห็นว่าลำดับการทำงานของ SAGA คือ Order, Stock, Payment, Shipping แต่ที่ Shipping เกิดล้มเหลวขึ้นมา ลำดับการชดเชยจึงเป็น Payment, Stock, Order <strong>เป็นลำดับย้อน (Reverse Order)</strong></p>
+    Note over S1,S4: System back to Consistent State</pre><p>จากภาพจะเห็นว่าลำดับการทำงานของ SAGA คือ Order, Stock, Payment, Shipping แต่ที่ Shipping เกิดล้มเหลวขึ้นมา ลำดับการชดเชยจึงเป็น Payment, Stock, Order <strong>เป็นลำดับย้อน (Reverse Order)</strong> โดยจะส่งข้อความกลับไปหา Service ตัวก่อนๆ ให้ทำการชดเชย Record</p>
 
     <blockquote>
         <p><strong>Important Note</strong> 📝:</p>
@@ -1065,6 +1065,28 @@
             
                 
 <article class="">
+    <a href="/blogs/microservice/05-ddd/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/06-event-sourcing/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
     <a href="/blogs/microservice/04-query/">
         
 
@@ -1092,22 +1114,6 @@
 
         <div class="article-details">
             <h2 class="article-title">Microservice ตอนที่ 1 Monolith vs Microservice</h2>
-        </div>
-    </a>
-</article>
-            
-                
-<article class="has-image">
-    <a href="/post/microservice/">
-        
-        <div class="article-image">
-            <img alt="Featured image of post Microservice" height="150" loading="lazy" src="/post/microservice/microservice-icon_hu_7285d72cc3896004.png" srcset="/post/microservice/microservice-icon_hu_7285d72cc3896004.png 1x, /post/microservice/microservice-icon_hu_7212e026978759a2.png 2x" width="250">
-
-        </div>
-        
-
-        <div class="article-details"style="background: linear-gradient(0deg, #d9c73b80 0%, #f6f6f6C0 100%);">
-            <h2 class="article-title">Microservice</h2>
         </div>
     </a>
 </article>
