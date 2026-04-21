@@ -27,6 +27,6 @@ Microservice คือสถาปัตยกรรมที่แบ่งร�
 
 [บทที่ 4: การจัดการกับ Query](../../blogs/microservice/04-query/)
 
-[บทที่ 5: การออกแบบ Business logic และ Service ด้วย Domain Driven Design ](../../blogs/microservice/04-query/)
+[บทที่ 5: การออกแบบ Business logic และ Service ด้วย Domain Driven Design ](../../blogs/microservice/05-ddd/)
 
 {{< page-nav prev-link="/../" next-link="../../blogs/microservice/01-introduction/">}}
