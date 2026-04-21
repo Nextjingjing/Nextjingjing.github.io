@@ -1,4 +1,1012 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Nextjingjing</title><link>https://Nextjingjing.github.io/categories/blogs/</link><description>Recent content in Blogs on Nextjingjing</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 11 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Nextjingjing.github.io/categories/blogs/index.xml" rel="self" type="application/rss+xml"/><item><title>Microservice ตอนที่ 4 Queries in Microservice</title><link>https://Nextjingjing.github.io/blogs/microservice/04-query/</link><pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/04-query/</guid><description>&lt;h1 id="การทำ-query-ใน-microservice"&gt;การทำ Query ใน Microservice
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Nextjingjing</title><link>https://Nextjingjing.github.io/categories/blogs/</link><description>Recent content in Blogs on Nextjingjing</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 18 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Nextjingjing.github.io/categories/blogs/index.xml" rel="self" type="application/rss+xml"/><item><title>Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</title><link>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</link><pubDate>Sat, 18 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</guid><description>&lt;h1 id="domain-driven-design"&gt;Domain Driven Design
+&lt;/h1&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;Domain Driven Design เป็นศาสตร์ที่ช่วยในการออกแบบ Business logic และช่วยหาว่าเราต้องมี Service อะไรบ้างใน Microservices&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h2 id="business-logic-design-patterns"&gt;Business logic design patterns
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;Transaction script&lt;/li&gt;
+&lt;li&gt;Domain model&lt;/li&gt;
+&lt;li&gt;Aggregate&lt;/li&gt;
+&lt;li&gt;Domain event&lt;/li&gt;
+&lt;li&gt;Event sourcing (บทที่ 6 เราจะพูดถึง)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="transaction-script-pattern"&gt;Transaction script pattern
+&lt;/h2&gt;&lt;h3 id="ลกษณะ"&gt;ลักษณะ
+&lt;/h3&gt;&lt;p&gt;Transaction script pattern คือ Business logic model แบบที่เราคุ้นเคยมากที่สุด โดยมีข้อสังเกตคือมันจะแบ่งให้ Class มี Behavior อย่างเดียวหรือ State อย่างเดียว&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;classDiagram
+ class Account {
+ +int accountId
+ +String ownerName
+ +double balance
+ }
+
+ class AccountRepository {
+ +find(id: int) Account
+ +update(account: Account) void
+ +save(account: Account) void
+ }
+
+ class AccountService {
+ -AccountRepository repository
+ +deposit(accountId: int, amount: double) void
+ +withdraw(accountId: int, amount: double) void
+ +transfer(fromId: int, toId: int, amount: double) void
+ }
+
+ AccountService --&gt; AccountRepository : uses
+ AccountService ..&gt; Account : manipulates
+ AccountRepository ..&gt; Account : returns/persists&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;AccountService&lt;/code&gt; มีแค่ Behavior&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;AccountRepository&lt;/code&gt; มีแค่ Behavior&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Account&lt;/code&gt; มีแค่ State ไม่มี Behavior&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ปญหา"&gt;ปัญหา
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;หาก Business logic ซับซ้อนจะไม่เหมาะสม ได้แก่
+&lt;ul&gt;
+&lt;li&gt;Big Ball of Mud ยิ่งระบบโตทำให้โค้ดยาวเป็นก้อนโคนยักษ์จนอ่านไม่ออก เช่น Business logic อยู่ในที่ Service หมดเลยที่เดียวทำให้อ่านยาวนาน ตอนแรกโคลนอาจจะไม่โต แต่นานๆ เข้าโคลนก้อนนั้นจะโตขึ้น&lt;/li&gt;
+&lt;li&gt;Duplicated code เกิดการซ้ำซ้อนของโค้ด เช่น&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;classDiagram
+ class RetailOrderService {
+ +checkout(orderId)
+ }
+ class CorporateOrderService {
+ +processBulkOrder(orderId)
+ }
+ class Order {
+ +double amount
+ +String status
+ }
+
+ note for RetailOrderService "ภาษี = amount * 0.07"
+ note for CorporateOrderService "ภาษี = amount * 0.07"
+
+ RetailOrderService ..&gt; Order : ดึงข้อมูลไปคำนวณ
+ CorporateOrderService ..&gt; Order : ดึงข้อมูลไปคำนวณ&lt;/pre&gt;&lt;p&gt;&lt;code&gt;ภาษี = amount * 0.07&lt;/code&gt; หากอยากแก้เป็น &lt;code&gt;ภาษี = amount * 0.10&lt;/code&gt; เราต้องแก้ทั้งสอง Service เลย ทางแก้คือเราสามารถทำให้เป็นแบบ&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;classDiagram
+ class Order {
+ +double amount
+ +String status
+ +calculateTax() double
+ }
+ class RetailOrderService {
+ +checkout(orderId)
+ }
+ class CorporateOrderService {
+ +processBulkOrder(orderId)
+ }
+
+ note for Order "มีคำนวณภาษีให้"
+
+ RetailOrderService ..&gt; Order : สั่งให้ Order คำนวณ
+ CorporateOrderService ..&gt; Order : สั่งให้ Order คำนวณ&lt;/pre&gt;&lt;p&gt;แบบนี้คือเราสามารถแก้การคำนวณภาษีที่จุดเดียว ไม่ต้องแก้สองจุดและนี้แหละคือสิ่งที่ Domain model จะทำให้เราในจุดนี้ และทำให้ Business logic ไม่ไปอยู่ที่ Service&amp;rsquo;s logic แค่จุดเดียว&lt;/p&gt;
+&lt;h2 id="domain-model-pattern"&gt;Domain model pattern
+&lt;/h2&gt;&lt;h3 id="ลกษณะ-1"&gt;ลักษณะ
+&lt;/h3&gt;&lt;p&gt;Domain model pattern คือ Business logic model ที่มี Learning curve สูงเรียนรู้ยาก แต่ทำให้ Business logic ไม่เกิด Big Ball of Mud และ Duplicated code โดยมีข้อสังเกตคือมันจะแบ่งให้ Class มี Behavior อย่างเดียวหรือ State อย่างเดียวหรือมีทั้งสองอย่างเลย&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;classDiagram
+ class Account {
+ &lt;&lt;Entity&gt;&gt;
+ +int accountId
+ +String ownerName
+ +double balance
+ +deposit(amount: double) void
+ +withdraw(amount: double) void
+ -setBalance(amount: double) void
+ }
+
+ class AccountRepository {
+ &lt;&lt;Repository&gt;&gt;
+ +find(id: int) Account
+ +save(account: Account) void
+ }
+
+ class BankingService {
+ &lt;&lt;Service&gt;&gt;
+ -AccountRepository repository
+ +transfer(fromId: int, toId: int, amount: double) void
+ }
+
+ BankingService --&gt; AccountRepository : uses
+ BankingService ..&gt; Account : coordinates
+ AccountRepository ..&gt; Account : persists&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Account&lt;/code&gt; มีทั้ง Behavior และ State&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;AccountRepository&lt;/code&gt; มีแค่ Behavior&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BankingService&lt;/code&gt; มีแค่ Behavior&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;จุดที่แตกต่างกันคือ &lt;code&gt;Account&lt;/code&gt;, &lt;code&gt;AccountService&lt;/code&gt; และ &lt;code&gt;BankingService&lt;/code&gt; เราย้ายบางอย่างไปอยู่ใน &lt;code&gt;Account&lt;/code&gt; แทนคือ &lt;code&gt;deposit()&lt;/code&gt; และ &lt;code&gt;withdraw()&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="ขอด"&gt;ข้อดี
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;แก้ปัญหาที่เกิดใน Transaction script pattern ได้ดี&lt;/li&gt;
+&lt;li&gt;ใช้งานในระบบใหญ่ๆ ซับซ้อนได้ดี&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ขอเสย"&gt;ข้อเสีย
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Learning curve สูง&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="domain-driven-design-ddd"&gt;Domain-Driven Design (DDD)
+&lt;/h3&gt;&lt;p&gt;DDD ได้มอบรูปแบบของ Domain model เป็นประเภทของ Class ดังต่อไปนี้&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Entity เป็นคลาสที่มีทั้ง Behavior และ State และ &lt;strong&gt;มี Identity&lt;/strong&gt; เช่น id
+&lt;ul&gt;
+&lt;li&gt;Entity A แม้นจะเหมือน Entity B (id ห้ามเหมือน) แต่ก็ไม่ใช่สิ่งเดียวกัน&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;เช่น บัญชีเงินฝากนาย A มีเงิน 100 บาท ไม่ใช่สิ่งเดียวกับบัญชีนาย B ที่มีเงิน 100 บาทเท่ากัน&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;span class="lnt"&gt;20
+&lt;/span&gt;&lt;span class="lnt"&gt;21
+&lt;/span&gt;&lt;span class="lnt"&gt;22
+&lt;/span&gt;&lt;span class="lnt"&gt;23
+&lt;/span&gt;&lt;span class="lnt"&gt;24
+&lt;/span&gt;&lt;span class="lnt"&gt;25
+&lt;/span&gt;&lt;span class="lnt"&gt;26
+&lt;/span&gt;&lt;span class="lnt"&gt;27
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Account&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;id&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Identity&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ownerName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;balance&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Value Object&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Constructor&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;Account&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ownerName&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;initialBalance&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;id&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Objects&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;requireNonNull&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;id&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;ownerName&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ownerName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;initialBalance&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;throw&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;IllegalArgumentException&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;Cannot open an account with a negative balance&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Entity&amp;#39;s Behavior&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;withdraw&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;throws&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Exception&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;balance&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;isLessThan&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;throw&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Exception&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;Insufficient funds&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;balance&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;balance&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;subtract&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Getters&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;getId&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;id&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;getBalance&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;balance&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="2"&gt;
+&lt;li&gt;Value Object (VO) เป็นคลาสที่มีทั้ง Behavior และ State &lt;strong&gt;ไม่มี Identity&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;Entity A เหมือน Entity B เราสามารถพูดได้ว่า A = B&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;เช่น เงิน 100 บาท = เงิน 100 บาท&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;record&lt;/span&gt; &lt;span class="nc"&gt;Money&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;long&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;currency&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;amount&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;throw&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;IllegalArgumentException&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;Amount cannot be negative&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;subtract&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;amount&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;currency&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;boolean&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;isLessThan&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Money&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;amount&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;other&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;amount&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ol start="3"&gt;
+&lt;li&gt;
+&lt;p&gt;Factory เป็นคลาสหรือเมธอดที่ใช้สร้าง Object จาก Class ต่างๆ เพราะเราจะไม่สร้าง Objectตรงๆ&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;เพราะอาจจะละเมิด Business Rule ได้ เช่น ตั้งค่าเงินในบัญชีให้ติดลบ&lt;/li&gt;
+&lt;li&gt;เพราะบางครั้งการสร้าง Object มีความซับซ้อนเกินไป จึงต้องมีตัวช่วยสร้าง&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Repository เป็นคลาสที่ถูกสร้างมาเพื่อบันทึก Entity, Value object ลง Database หรือจะ Query หรือ Update ก็ได้ในคลาสนี้&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Service เป็นคลาสที่มีแต่ Behavior ที่ไม่ควรจะอยู่ใน Entity หรือ Value Object&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="aggregate-pattern"&gt;Aggregate pattern
+&lt;/h2&gt;&lt;p&gt;ในช่วงแรกๆ เราจะออกแบบ Domain model แบบคร่าวๆ โดยมีแค่ Entity และ Value object ก่อน ขอยกตัวอย่างการออกแบบในระบบ E-commerce เราสามารถออกแบบ Domain model ได้ดังนี้&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;classDiagram
+ direction LR
+
+ class Customer {
+ +int id
+ +string name
+ +string email
+ +Address address
+ +getHistory() List~Order~
+ +updateProfile(string name, Address addr)
+ }
+
+ class Product {
+ +int id
+ +string name
+ +Money price
+ +int stock
+ +isAvailable(int quantity) bool
+ +reduceStock(int quantity)
+ +updatePrice(Money newPrice)
+ }
+
+ class Order {
+ +int id
+ +int customerId
+ +DateTime orderDate
+ +string status
+ +Money totalAmount
+ +calculateTotal() Money
+ +updateStatus(string newStatus)
+ +cancel()
+ }
+
+ class OrderItem {
+ +int id
+ +int orderId
+ +int productId
+ +int quantity
+ +Money unitPrice
+ +getSubtotal() Money
+ }
+
+ class Address {
+ +string street
+ +string city
+ +string postalCode
+ +getFullAddress() string
+ }
+
+ class Money {
+ +decimal amount
+ +string currency
+ +add(Money other) Money
+ +multiply(int factor) Money
+ }
+
+ %% Relationships
+ Customer "1" --&gt; "*" Order : places
+ Order "1" --&gt; "*" OrderItem : contains
+ Product "1" --&gt; "*" OrderItem : part of
+
+ %% VO Composition
+ Customer *-- Address
+ Product *-- Money
+ Order *-- Money
+ OrderItem *-- Money&lt;/pre&gt;&lt;p&gt;เนื่องจากเราใช้ Microservice เราจึงต้องจัดกลุ่มแบ่ง Sub Domain model ออกเป็นในหลายๆ Service ซึ่ง DDD ได้เรียกกลุ่มของโมเดลพวกนั้นว่า &lt;strong&gt;Aggregate&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;graph TB
+ %% Customer Aggregate
+ subgraph Customer_Aggregate [Customer Aggregate]
+ direction TB
+ C_Root[Customer Root]
+ C_Addr[Address VO]
+ C_Root --- C_Addr
+ end
+
+ %% Product Aggregate
+ subgraph Product_Aggregate [Product Aggregate]
+ direction TB
+ P_Root[Product Root]
+ P_Money[Money VO]
+ P_Root --- P_Money
+ end
+
+ %% Order Aggregate
+ subgraph Order_Aggregate [Order Aggregate]
+ direction TB
+ O_Root[Order Root]
+ O_Item[OrderItem Entity]
+ O_Money[Money VO]
+ OI_Money[Money VO]
+ 
+ O_Root --- O_Item
+ O_Root --- O_Money
+ O_Item --- OI_Money
+ end
+
+ %% Styling
+ style Customer_Aggregate fill:#fdfefe,stroke:#2e86c1,stroke-width:2px,stroke-dasharray: 5 5
+ style Product_Aggregate fill:#fdfefe,stroke:#d35400,stroke-width:2px,stroke-dasharray: 5 5
+ style Order_Aggregate fill:#fdfefe,stroke:#27ae60,stroke-width:2px,stroke-dasharray: 5 5
+ 
+ style C_Root fill:#ebf5fb,stroke:#2e86c1,stroke-width:2px
+ style P_Root fill:#fef5e7,stroke:#d35400,stroke-width:2px
+ style O_Root fill:#eafaf1,stroke:#27ae60,stroke-width:2px&lt;/pre&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;
+&lt;p&gt;Aggregate ไม่เท่ากับ Service นะ&lt;/p&gt;
+&lt;p&gt;1 Service อาจจะมีหลายๆ Aggregate ก็ได้&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="ลกษณะ-2"&gt;ลักษณะ
+&lt;/h3&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Aggregate pattern&lt;/strong&gt; คือการจัดระเบียบ Domain Model ให้อยู่ในรูปแบบของกลุ่มก้อน (Aggregates) โดยที่แต่ละกลุ่มก้อนจะประกอบด้วยชุดของ Object ต่างๆ (Entity, Value object) และจะถูกปฏิบัติหรือจัดการเสมือนว่า&lt;strong&gt;เป็นหน่วยเดียวกัน&lt;/strong&gt; (Unit)&amp;quot;&lt;/p&gt;
+&lt;p&gt;แต่ละ Aggregate ต้องมี Object ตัวแทนที่เรียกว่า &lt;strong&gt;Root&lt;/strong&gt; โดยพิจารณาจากตัวที่ใหญ่ที่สุด และเหมาะสมที่จะเป็น Single Entry Point (จุดเข้าทางเดียว) เพื่อ Ref. ไปหา Object อื่นๆ&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;p&gt;เช่น จากรูปด้านบนเราจะเรียก Order Aggregate จะเป็นมวลรวมของ Order, OrderItem, Money เป็นต้น&lt;/p&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;นอกจากนี้ DDD ยังได้มอบกฎของ Aggregate เพื่อทำให้เกิด Consistency ของข้อมูล&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="กฎของ-aggregate"&gt;กฎของ Aggregate
+&lt;/h3&gt;&lt;h4 id="reference-ไดแค-aggregate-root-เทานน"&gt;Reference ได้แค่ Aggregate root เท่านั้น
+&lt;/h4&gt;&lt;p&gt;ทำไมจึงมีกฏข้อนี้สมมุติว่ามีคลาสดังนี้&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Account&lt;/code&gt; เป็น &lt;strong&gt;Root&lt;/strong&gt; และมี &lt;code&gt;withdraw()&lt;/code&gt; เพื่อถอนเงินโดยมี Business rule ว่าห้ามถอนเงินเกินยอดเงินที่มี&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Account&lt;/code&gt; มี &lt;code&gt;Money&lt;/code&gt; เป็น Value object&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;หากคุณไม่ยอมใช้ &lt;code&gt;account.withdraw()&lt;/code&gt; แล้วไปยุ่งกับ &lt;code&gt;Money&lt;/code&gt; ตรงๆ คุณอาจจะเผลอที่จะละเมิด Business rule โดยการถอนเงินเกินที่มีได้ เป็นต้น&lt;/p&gt;
+&lt;h4 id="reference-ผาน-identity-เทานน"&gt;Reference ผ่าน Identity เท่านั้น
+&lt;/h4&gt;&lt;p&gt;เราจะไม่ Ref. ด้วย Object แต่จะ Ref. ด้วย Identity เช่น Primary key นั้นก็เพื่อให้เกิด Loose Coupling เช่น &lt;code&gt;Order&lt;/code&gt; จะ Ref. &lt;code&gt;Customer&lt;/code&gt; ผ่าน &lt;code&gt;customerId&lt;/code&gt; เท่านั้น ลองคิดว่า Order service มี Order aggregate และ Customer service มี Customer aggregate หาก Order service จะ Ref. &lt;code&gt;Customer&lt;/code&gt; แบบ Object หมายความว่ามันก็ต้องมี Customer aggregate ด้วย (หมายถึงก็ต้องเขียนโค้ด Domain model เพิ่มไปอีก)&lt;/p&gt;
+&lt;p&gt;ปัญหาที่ตามมาคือลองนึกภาพว่า Domain model ของ &lt;code&gt;Customer&lt;/code&gt; เปลี่ยนความซวยจะบังเกิดคุณต้องเปลี่ยนที่ Order service และ Customer service ทั้งสองที่ ทำให้ลำบากในการแก้ไข&lt;/p&gt;
+&lt;h4 id="ม-1-transaction-ตอการสรางหรออพเดต-1-aggregate-เทานน"&gt;มี 1 Transaction ต่อการสร้างหรืออัพเดต 1 Aggregate เท่านั้น
+&lt;/h4&gt;&lt;p&gt;กฎข้อนี้บอกว่าหากเราจะทำการสร้างหรืออัพเดต 1 Aggregate ทำได้แค่ 1 Transaction เท่านั้น ซึ่งดีกับ Saga pattern มากๆ เพราะ Saga pattern มันก็ทำเช่นนั้นอยู่แล้ว อีกทั้งยัง&lt;strong&gt;ทำให้แต่ละ Service เป็นอิสระต่อกัน (Decoupled)&lt;/strong&gt; เช่น หาก Aggregate ที่ช้ามากๆ อยู่ใน Transaction เดียวกับ Aggregate ที่เร็วมากๆ จะทำให้ทั้งหมดช้าไปเลย&lt;/p&gt;
+&lt;p&gt;แต่มันมีประเด็นที่น่าสนใจอยู่เช่น Service บางตัวอาจมีมากกว่า 1 Aggregate&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;graph TD
+ subgraph Saga ["Saga (Distributed Transaction)"]
+ direction LR
+ 
+ subgraph ServiceA ["Service A"]
+ T1["Local transaction 1"]
+ X["Aggregate X"]
+ T1 --&gt;|Create/update| X
+ end
+
+ subgraph ServiceB ["Service B"]
+ T2["Local transaction 2"]
+ Y["Aggregate Y"]
+ T3["Local transaction 3"]
+ Z["Aggregate Z"]
+ 
+ T2 --&gt;|Create/update| Y
+ T3 --&gt;|Create/update| Z
+ end
+
+ %% Connections between transactions
+ T1 --&gt; T2
+ T2 --&gt; T3
+ end
+
+ %% Styling
+ style Saga fill:none,stroke:#333,stroke-dasharray: 5 5
+ style ServiceA fill:#e0f7fa,stroke:#333
+ style ServiceB fill:#e0f7fa,stroke:#333
+ style X fill:#fff59d,stroke:#333
+ style Y fill:#fff59d,stroke:#333
+ style Z fill:#fff59d,stroke:#333
+ style T1 fill:#fff,stroke:#333
+ style T2 fill:#fff,stroke:#333
+ style T3 fill:#fff,stroke:#333&lt;/pre&gt;&lt;p&gt;จะเห็นว่า Service B มี Y, Z เป็น Aggregate ซึ่งจุดนี้จะทำให้เราเขียนโค้ดได้ลำบากขึ้นเพราะต้องปฏิบัติตามกฎของ DDD: Aggregate rule&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;ทางเลือกคนดี&lt;/strong&gt; ใช้ Saga pattern แม้นจะใน Service B จะมี Y, Z อยู่แล้วเราก็ต้อง สร้าง/อัพเดต Y แล้วส่ง Message/Event ไปบอกตัวเองให้ทำ สร้าง/อัพเดต Z ต่อไป
+&lt;ul&gt;
+&lt;li&gt;ส่งผ่าน Message broker เพื่อความน่าเชื่อถือ เช่น ไฟดับหากไม่เก็บใน Message broker แล้ว Event จะหายไปตลอดกาล&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ทางเลือกคนฉลาดดี&lt;/strong&gt; ถ้ารวม Y, Z เป็น Aggregate เดียวกันได้ก็ดีจบปัญหาเลย&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ทางเลือกคนเลว&lt;/strong&gt; โกงสร้าง/อัพเดต Y, Z ใน 1 Transaction ไปเลย แต่แหกกฎของ DDD: Aggregate rule
+&lt;ul&gt;
+&lt;li&gt;ข้อดี = ง่าย&lt;/li&gt;
+&lt;li&gt;ข้อเสีย
+&lt;ul&gt;
+&lt;li&gt;การขยายระบบทำได้ยาก เช่น Y ทำได้เร็วกว่า Z มาก แต่ต้องช้าเพราะผูกใน Transaction เดียวกัน&lt;/li&gt;
+&lt;li&gt;ใช้ NoSql ไม่ได้ เช่น MongoDB สามารถทำ Atomicity แค่ภายใน Document เดียวกัน&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="domain-events-pattern"&gt;Domain events pattern
+&lt;/h2&gt;&lt;h3 id="ความหมายของ-event"&gt;ความหมายของ Event
+&lt;/h3&gt;&lt;p&gt;ในบริบทของ DDD นั้น Domain events หมายถึงเหตุการณ์ที่เกิดขึ้นเมื่อมีการสร้าง/อัพเดต Aggregate&lt;/p&gt;
+&lt;p&gt;เช่น Order aggregate สามารถมี Event ได้แก่&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;OrderCreated&lt;/li&gt;
+&lt;li&gt;OrderCancelled&lt;/li&gt;
+&lt;li&gt;OrderShipped&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;เป็นต้น&lt;/p&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Domain event pattern&lt;/strong&gt;: Aggregate สามารถ publish domain event เมื่อ Aggregate นั้นๆ ถูกสร้างหรือเกิดการอัพเดตที่สำคัญ&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="ลกษณะ-3"&gt;ลักษณะ
+&lt;/h3&gt;&lt;p&gt;เรามาดูว่ามันทำงานอย่างไรกันในตัวอย่างการสร้าง Order แล้วส่ง Event ไปให้ Email Service ส่งอีเมลบอกลูกค้า&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;sequenceDiagram
+ participant Agg as Aggregate (Order)
+ participant DB as Database
+ participant Broker as Message Broker (RabbitMQ/Kafka)
+ participant Sub as Subscriber (Email Service)
+
+ Note over Agg, DB: [Transaction Boundary]
+ Agg-&gt;&gt;Agg: 1. เปลี่ยนสถานะ (State Change)
+ Agg-&gt;&gt;DB: 2. บันทึกข้อมูล &amp; Outbox Event
+ 
+ Note over DB, Broker: [Relay Process]
+ DB--&gt;&gt;Broker: 3. ส่ง Event ไปยัง Broker
+ 
+ Note over Broker, Sub: [Asynchronous Delivery]
+ Broker-&gt;&gt;Sub: 4. Push/Pull Event
+ Sub-&gt;&gt;Sub: 5. ส่ง Email ให้ลูกค้า&lt;/pre&gt;&lt;p&gt;จะเห็นว่าตัวอย่างนี้มีการใช้ &lt;strong&gt;Outbox pattern&lt;/strong&gt; (จากบทที่ 2) เพื่อให้การบันทึกข้อมูลและส่งข้อความแบบ Atomic&lt;/p&gt;
+&lt;p&gt;เรามาดูโค้ดคร่าวๆ กัน&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;interface&lt;/span&gt; &lt;span class="nc"&gt;DomainEvent&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;เราสร้าง Interface ที่มีชื่อว่า &lt;code&gt;DomainEvent&lt;/code&gt; ทีนี้สิ่งที่เราควรทำต่อมาคือการฝัง Metadata ให้ Event ของเรา&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;DomainEventEnvelope&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;T&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;extends&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DomainEvent&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;aggregateType&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Object&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;aggregateId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;T&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Constructor&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;DomainEventEnvelope&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(...)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{...}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;เราใช้ Generic type T ซึ่งต้อง implement มาจาก Interface &lt;code&gt;DomainEvent&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;ต่อไปเราจะสร้าง OrderCreated ซึ่งจะ Publish เมื่อมีการสร้าง Order aggregate โดยจะ implement มาจาก Interface &lt;code&gt;DomainEvent&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;OrderCreated&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;implements&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DomainEvent&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;orderId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;customerId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Double&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;totalAmount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;OrderItem&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Constructor&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;OrderCreated&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;orderId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;customerId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Double&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;totalAmount&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;OrderItem&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;orderId&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;orderId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Getter Setter&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;getOrderId&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;orderId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;ตอนนี้เรามี &lt;code&gt;OrderCreated&lt;/code&gt; เนื่องจาก Event ตัวนี้มันต้องการที่จะถูก Publish เมื่อ Aggregate ถูกสร้างเรามาดูกันว่ามันจะเป็นไง&lt;/p&gt;
+&lt;h4 id="การ-publish-domain-event"&gt;การ Publish Domain event
+&lt;/h4&gt;&lt;p&gt;Order Aggregate&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;span class="lnt"&gt;20
+&lt;/span&gt;&lt;span class="lnt"&gt;21
+&lt;/span&gt;&lt;span class="lnt"&gt;22
+&lt;/span&gt;&lt;span class="lnt"&gt;23
+&lt;/span&gt;&lt;span class="lnt"&gt;24
+&lt;/span&gt;&lt;span class="lnt"&gt;25
+&lt;/span&gt;&lt;span class="lnt"&gt;26
+&lt;/span&gt;&lt;span class="lnt"&gt;27
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Order&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;id&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;customerId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Double&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;totalAmount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;OrderStatus&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;OrderItem&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Event&amp;#39;s List&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;DomainEvent&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;domainEvents&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ArrayList&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Constructor&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;Order&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;customerId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;OrderItem&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;id&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;UUID&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;randomUUID&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="na"&gt;toString&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Create event&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;domainEvents&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;add&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;OrderCreated&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;customerId&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Get Events&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;DomainEvent&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;getDomainEvents&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{...}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Clear Events&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;clearDomainEvents&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{...}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// Another Getter, Setter&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;สังเกตว่าเราจะสร้าง &lt;code&gt;private final List&amp;lt;DomainEvent&amp;gt; domainEvents = new ArrayList&amp;lt;&amp;gt;();&lt;/code&gt; มาเก็บ Event ที่สร้างเป็น ArrayList เพราะอาจจะมีหลายๆ Events ได้ และตอนที่ Aggregate ถูกสร้าง (บรรทัดที่ 16 &lt;code&gt;this.domainEvents.add(...)&lt;/code&gt;) เราก็มีการเอา Event มาเก็บใน Order aggregate ตัวนี้&lt;/p&gt;
+&lt;p&gt;ในขั้นตอนต่อไปคือการบันทึก Aggregate ลง Database และทำ Outbox pattern กัน&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;span class="lnt"&gt;20
+&lt;/span&gt;&lt;span class="lnt"&gt;21
+&lt;/span&gt;&lt;span class="lnt"&gt;22
+&lt;/span&gt;&lt;span class="lnt"&gt;23
+&lt;/span&gt;&lt;span class="lnt"&gt;24
+&lt;/span&gt;&lt;span class="lnt"&gt;25
+&lt;/span&gt;&lt;span class="lnt"&gt;26
+&lt;/span&gt;&lt;span class="lnt"&gt;27
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nd"&gt;@Service&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;OrderAppService&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nd"&gt;@Autowired&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;OrderRepository&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;orderRepository&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nd"&gt;@Autowired&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;private&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;OutboxRepository&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;outboxRepository&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nd"&gt;@Transactional&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;void&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;createOrder&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;customerId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;List&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;OrderItem&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Order&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;order&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Order&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;customerId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;items&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;orderRepository&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;save&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;order&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DomainEvent&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;order&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;getDomainEvents&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DomainEventEnvelope&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;OrderCreated&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;envelope&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DomainEventEnvelope&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;Order&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;order&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;getId&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;outboxRepository&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;save&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;envelope&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;order&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;clearDomainEvents&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;class OrderAppService&lt;/code&gt; ซึ่งมันเป็น Application service ไม่ใช่ Domain service ใน Domain model ผมจึงใช้ชื่อ &lt;strong&gt;OrderAppService&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;orderRepository&lt;/code&gt; ใช้บันทึกข้อมูลลง Order ลง Database&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;outboxRepository&lt;/code&gt; ใช้บันทึก Event ลง Database&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;@Transactional&lt;/code&gt; เราจะทำบันทึก Database ทั้ง Order aggregate และ Event (Outbox) ไปคู่กันใน Transaction เดียวกัน (ตามทฤษฎีบทที่ 2 &lt;strong&gt;Outbox pattern&lt;/strong&gt;)
+&lt;ul&gt;
+&lt;li&gt;บรรทัดที่ 11 &lt;code&gt;Order order = new Order(customerId, items);&lt;/code&gt; ได้ทำการสร้าง Event ใส่ใน &lt;code&gt;order.domainEvents&lt;/code&gt; นั้นเอง ซึ่งมันเป็น Private และต้องเรียกผ่าน &lt;code&gt;order.getDomainEvents()&lt;/code&gt; เท่านั้น&lt;/li&gt;
+&lt;li&gt;จากบทที่ 2 เมื่อบันทึก Event ลง Outbox table แล้ว เราจะให้ Relay ไปอ่าน Outbox table เพื่อส่งข้อความไปให้ Service อื่นๆ&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="กลยทธการออกแบบ-service"&gt;กลยุทธ์การออกแบบ Service
+&lt;/h2&gt;&lt;p&gt;ในหัวข้อนี้เราจะมาดูวิธีการในการกำหนดออกแบบว่า Microservice ของเราจำเป็นต้องมี Service อะไรบ้าง?&lt;/p&gt;
+&lt;h3 id="การรวบรวม-functional-requirements"&gt;การรวบรวม Functional requirements
+&lt;/h3&gt;&lt;p&gt;เราจะใช้เทคนิคที่เรียกว่า &lt;strong&gt;User story&lt;/strong&gt; ในการสร้าง Functional requirements โดยแต่งนิทาน เช่น&lt;/p&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;ในฐานะ (As a/an)&lt;/strong&gt; &lt;code&gt;Consumer&lt;/code&gt;
+&lt;strong&gt;ฉันต้องการ (I want to)&lt;/strong&gt; ที่จะสั่งซื้อสินค้า &lt;code&gt;Place Order&lt;/code&gt; &lt;strong&gt;เพื่อที่จะ (So that)&lt;/strong&gt; &lt;code&gt;บอกระบบว่าฉันต้องการสินค้าชิ้นไหนบ้าง? และจะได้รู้ยอดชำระ&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;As a/an&lt;/strong&gt; ในประโยคนี้ช่วยให้เราได้คำนามที่น่าจะมีประโยชน์ (อาจจะเอามาเป็นชื่อ Service ภายหลังได้)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;I want to&lt;/strong&gt; ในประโยคนี้ทำให้เราได้กริยา (อาจจะเอามาเป็น &lt;strong&gt;Systems Operation&lt;/strong&gt; ได้)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;So that&lt;/strong&gt; ในประโยคนี้ทำให้เราได้ผลลัพธ์ที่จะเกิด และช่วยให้รู้ว่าเป็น Functional requirements ที่จำเป็นขนาดไหน? หรือถ้าไม่สำคัญเลยอาจจะไม่ใช่ Functional requirements เลยก็ได้&lt;/li&gt;
+&lt;/ul&gt;
+
+ &lt;/blockquote&gt;
+&lt;h4 id="uml-diagram-ทมประโยชน"&gt;UML diagram ที่มีประโยชน์
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Use Case Diagram ช่วยให้เราเห็นภาพรวมจาก User story&lt;/li&gt;
+&lt;li&gt;Sequence Diagram ช่วยให้เราเห็นกริยาว่าเกิดอะไรขึ้นบ้างจริงๆ เช่น &lt;code&gt;placeOrder()&lt;/code&gt; ต้องมีการ &lt;code&gt;addItem()&lt;/code&gt;, &lt;code&gt;calculateTotal()&lt;/code&gt;, &lt;code&gt;confirmOrder()&lt;/code&gt; เป็นต้น&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ออกแบบ-domain-model"&gt;ออกแบบ Domain model
+&lt;/h3&gt;&lt;h4 id="uml-diagram-ทมประโยชน-1"&gt;UML diagram ที่มีประโยชน์
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Class Diagram&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ออกแบบ Domain model เหมือนที่หัวข้อก่อนๆ แต่คิดแค่ Entity กับ Value Object ไปก่อน เช่น&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;classDiagram
+ direction LR
+
+ class Customer {
+ +int id
+ +string name
+ +string email
+ +Address address
+ +getHistory() List~Order~
+ +updateProfile(string name, Address addr)
+ }
+
+ class Product {
+ +int id
+ +string name
+ +Money price
+ +int stock
+ +isAvailable(int quantity) bool
+ +reduceStock(int quantity)
+ +updatePrice(Money newPrice)
+ }
+
+ class Order {
+ +int id
+ +int customerId
+ +DateTime orderDate
+ +string status
+ +Money totalAmount
+ +calculateTotal() Money
+ +updateStatus(string newStatus)
+ +cancel()
+ }
+
+ class OrderItem {
+ +int id
+ +int orderId
+ +int productId
+ +int quantity
+ +Money unitPrice
+ +getSubtotal() Money
+ }
+
+ class Address {
+ +string street
+ +string city
+ +string postalCode
+ +getFullAddress() string
+ }
+
+ class Money {
+ +decimal amount
+ +string currency
+ +add(Money other) Money
+ +multiply(int factor) Money
+ }
+
+ %% Relationships
+ Customer "1" --&gt; "*" Order : places
+ Order "1" --&gt; "*" OrderItem : contains
+ Product "1" --&gt; "*" OrderItem : part of
+
+ %% VO Composition
+ Customer *-- Address
+ Product *-- Money
+ Order *-- Money
+ OrderItem *-- Money&lt;/pre&gt;&lt;h3 id="การนยาม-service-โดยการ-decompose-by-subdomain-pattern"&gt;การนิยาม Service โดยการ Decompose by subdomain pattern
+&lt;/h3&gt;&lt;p&gt;&lt;img alt="https://microservices.io/patterns/decomposition/decompose-by-subdomain.html" class="gallery-image" data-flex-basis="196px" data-flex-grow="81" height="919" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://Nextjingjing.github.io/blogs/microservice/05-ddd/decompose-by-subdomain.png" width="753"&gt;&lt;/p&gt;
+&lt;h4 id="domain-คออะไร"&gt;Domain คืออะไร?
+&lt;/h4&gt;&lt;p&gt;ก่อนอื่นเราต้องรู้ก่อนว่า Domain model ที่เราได้เรียนรู้ในหัวข้อก่อนๆ นั้นเป็นมุมมอง Solution space ทีนี้ Domain เฉยๆ ที่ยังไม่ได้เอาไปทำโมเดล เป็นมุม Problem space กัน&lt;/p&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Domain&lt;/strong&gt; คือ ปัญหาทั้งหมดที่ธุรกิจ&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Domain Model&lt;/strong&gt; คือ วิธีการแก้ปัญหาทางธุรกิจหรือความรู้ต่างๆ ที่ใช้แก้ปัญหา&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;p&gt;แต่ปัญหาคือ &lt;strong&gt;Domain&lt;/strong&gt; ปัญหาทั้งหมดที่ธุรกิจ มันยากที่จะแก้ได้ง่าย คิดไม่ออก เราจึงแบ่งปัญหาใหญ่ๆ ออกเป็นปัญหาย่อยๆ ที่แก้ง่ายขึ้น เรียกว่า &lt;strong&gt;Subdomain&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Domain Model&lt;/strong&gt; ก็ถูกแบ่งออกเป็น Aggregate ได้เช่นกัน&lt;/p&gt;
+&lt;p&gt;ตัวอย่างเช่น&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;graph TD
+ subgraph Domain [E-commerce Domain]
+ 
+ S1[Subdomain: &lt;br/&gt;Order management]
+ S2[Subdomain: &lt;br/&gt;Product management]
+ S3[Subdomain: &lt;br/&gt;Inventory management]
+ S4[Subdomain: &lt;br/&gt;Delivery management]
+
+ %% ความสัมพันธ์เชิงธุรกิจ
+ S1 -.- S2
+ S1 -.- S3
+ S1 -.- S4
+ S3 -.- S4
+
+ end
+
+ %% Styling
+ style Domain fill:#fdfdfd,stroke:#333,stroke-width:2px
+ style S1 fill:#fff,stroke:#666,stroke-dasharray: 5 5
+ style S2 fill:#fff,stroke:#666,stroke-dasharray: 5 5
+ style S3 fill:#fff,stroke:#666,stroke-dasharray: 5 5
+ style S4 fill:#fff,stroke:#666,stroke-dasharray: 5 5&lt;/pre&gt;&lt;h4 id="bounded-context-คออะไร"&gt;Bounded context คืออะไร?
+&lt;/h4&gt;&lt;p&gt;ภาษามนุษย์นี่มันต้องรู้บริบทก่อนถึงจะเข้าใจความหมาย หากไม่รู้บริบทอาจจะไม่รู้ว่าพูดถึงอะไรได้ เช่น Present จะรู้ได้ไงว่าแปลว่าปัจจุบันหรือแปลว่าของขวัญ? มันก็ต้องอาศัยบริบทรอบๆ เพื่อตีความหมายนั้นๆ&lt;/p&gt;
+&lt;p&gt;ทีนี้เพื่อให้ทุกคนเข้าใจตรงกันจึงต้องจำกัดบริบทไว้ในกรอบๆ หนึ่งเพื่อไม่ให้ไปตีความเป็นอีกความหมายหนึ่งซึ่งเรียกว่า &lt;strong&gt;Bounded context&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;เช่น&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Account&lt;/code&gt; ในบริบทของ &lt;strong&gt;Banking Service&lt;/strong&gt; คือบัญชีเงินฝาก&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Account&lt;/code&gt; ในบริบทของ &lt;strong&gt;Authentication Service&lt;/strong&gt; คือบัญชีที่ใช้ยืนยันตัวตน&lt;/li&gt;
+&lt;/ul&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Bounded context&lt;/strong&gt; คือ scope ของ Domain model เพื่อให้แต่ละ Object มีความหมายไม่กำกวม&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Bounded context ใน Microservice มันคือ Service เลยแหละ&lt;/strong&gt;&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;p&gt;ดังนั้นขอสรุปว่าการกำหนด Service ใน Microservice สามารถทำได้โดยการสร้าง &lt;strong&gt;Bounded context&lt;/strong&gt; และเราจะแมพ Subdomain ไปหา Service เพื่อบอกว่า Service นี้ใช้แก้ปัญหา Subdomain อะไร&lt;/p&gt;
+&lt;p&gt;การแมพ Problem space ไปหา Solution space ที่ต้องทำแบบนี้เพราะช่วยให้รู้ว่า Service แก้ปัญหา Subdomain อันไหนได้บ้าง&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;graph TD
+ %% 1. Problem Space
+ subgraph Space1 [Subdomain]
+ SD[Order Management]
+ end
+
+ %% 2. Solution Space
+ subgraph Space2 [Bounded Context]
+ subgraph OS [Order Service]
+ direction TB
+ subgraph DM [Domain Model]
+ direction TB
+ Model[Entities / Aggregates / Logic]
+ end
+ end
+ end
+
+ %% Mapping Connections
+ SD -- "Maps to" --&gt; OS
+
+ %% Styling
+ style SD fill:#f9f,stroke:#333,stroke-width:2px
+ style OS fill:#bbf,stroke:#333,stroke-width:2px
+ style DM fill:#fff9c4,stroke:#fbc02d,stroke-dasharray: 5 5&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;เท่านี้เราจะได้ Service มาหนึ่งตัวแล้ว
+&lt;ul&gt;
+&lt;li&gt;ความหมายของการแมพนี้คือ Order Service ใช้แก้ Order Management Subdomain&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;
+&lt;p&gt;เรื่องที่ควรรู้เกี่วกับ Bounded context&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;เราอาจจะแมพหลายๆ Subdomain ไปหา 1 Bounded context ได้ ไม่จำเป็นว่า 1 Subdomain ต่อ 1 Bounded context&lt;/li&gt;
+&lt;li&gt;การคิด Service (Bounded context) ก็คิดมาแค่ให้มันแก้ได้อย่างน้อยหนึ่ง Subdomain และเลือกชื่อที่มันเหมาะสม&lt;/li&gt;
+&lt;li&gt;แม้นว่าหลายๆ Subdomain ไปหา 1 Bounded context แต่ถ้าเราเอา Subdomain ที่อยู่คนละหน้าที่กันเลยแบบคนละโลกเลย จะได้ Fat Service มาแทน ทำให้ maintenance ยากเพราะโค้ดใหญ่
+&lt;ul&gt;
+&lt;li&gt;โดยทั่วไปควร 1 Subdomain : 1 Bounded context&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+ &lt;/blockquote&gt;
+&lt;p&gt;เช่น&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;graph TD
+ %% 1. Problem Space
+ subgraph Subdomains [Domain]
+ SD1["Order subdomain"]
+ SD2["Promotion subdomain"]
+ SD3["..."]
+ end
+
+ %% 2. Implementation
+ subgraph Services [Implementation]
+ S1[["Order Service"]]
+ S2[["..."]]
+ end
+
+ %% Mapping connections
+ SD1 --&gt; S1
+ SD2 --&gt; S1
+ SD3 --&gt; S2
+
+ %% Styling
+ style S1 fill:#dfd,stroke:#2d2,stroke-width:2px
+ style S2 fill:#dfd,stroke:#2d2,stroke-width:2px
+ style SD1 fill:#f9f,stroke:#333
+ style SD2 fill:#f9f,stroke:#333&lt;/pre&gt;&lt;h4 id="ubiquitous-language"&gt;Ubiquitous Language
+&lt;/h4&gt;&lt;p&gt;คือ &lt;strong&gt;&amp;ldquo;ภาษากลาง&amp;rdquo;&lt;/strong&gt; ที่ทุกคนในทีมใช้แบบเดียวกันทั้งทีมธุรกิจและทีมนักพัฒนา&lt;/p&gt;
+&lt;h4 id="คำแนะนำ"&gt;คำแนะนำ
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Single Responsibility Principle - SRP&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;ควรออกแบบ Service ให้มีหน้าที่รับผิดชอบเดียว (High Cohesive) และมีขนาดเล็กพอเหมาะ เพราะทำให้ Maintenance ได้ง่ายกว่า (ทางที่ดี 1 Service ต่อ 1 Subdomain)&lt;/p&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;&lt;strong&gt;Common Closure Principle - CCP&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;หากมีกลุ่ม Services ไหนต้องมีการเปลี่ยงแปลงตามธุรกิจที่เปลี่ยนไปตามกาลเวลา พร้อมกันและเหตุผลในการเปลี่ยนเดียวกัน ควรจับมาอยู่ใน Service เดียวกัน&lt;/p&gt;</description></item><item><title>Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</title><link>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</link><pubDate>Sat, 18 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</guid><description>&lt;h1 id="event-sourcing"&gt;Event sourcing
+&lt;/h1&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;โดยปกติแล้วการบันทึกข้อมูลลงฐานข้อมูลนั้นเราจะบันทึกแค่ค่าปัจจุบันของ Record นั้นๆ แต่ปัญหาที่ตามมาคือเราจะไม่เห็นประวัติเก่าของ Record นั้นๆ ดังนั้น Event sourcing จึงมาแก้ปัญหาดังกล่าว&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h2 id="ประเภทของการเกบขอมล"&gt;ประเภทของการเก็บข้อมูล
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;State-oriented Persistence (การเก็บสถานะปัจจุบัน) เป็นแบบที่เราคุ้นเคยเลยเก็ยสถานะปัจจุบันของข้อมูล แต่ประวัติหายหมด&lt;/li&gt;
+&lt;/ol&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th style="text-align: left"&gt;account_id&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;customer_name&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;balance&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;last_updated&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;status&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;Somchai Dee&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;850.00&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 10:30:00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;Active&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;ACC-002&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;Somsak Range&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;1,200.00&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-19 14:15:00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;Active&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;Event Sourcing (Event-oriented Persistence) เป็นแบบที่เน้นเก็บทุกสถานะของข้อมูลลงในฐานข้อมูล แล้วค่อยนำกลับมารวมกันคำนวณเป็นสถานะปัจจุบันแทน ซึ่งข้อดีคือประวัติยังอยู่&lt;/li&gt;
+&lt;/ol&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th style="text-align: left"&gt;event_id&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;account_id&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;event_type&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;amount&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;timestamp&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;1&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;AccountOpened&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;0.00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 09:00:00&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;2&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyDeposited&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;1000.00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 09:15:00&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;3&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyWithdrawn&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;150.00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 10:30:00&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;4&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyWithdrawn&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;200.00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 11:00:00&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;ซึ่งสถานะปัจจุบันของ &lt;code&gt;ACC-001&lt;/code&gt; คือ 0.00 + 1000.00 - 150.00 - 200.00 = &lt;strong&gt;650.00&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id="event-sourcing-1"&gt;Event sourcing
+&lt;/h2&gt;&lt;h3 id="ลกษณะ"&gt;ลักษณะ
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Event-oriented Persistence เก็บทุกสถานะแล้วนำมารวมเป็นข้อมูล&lt;/li&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Microservice ตอนที่ 4 Queries in Microservice</title><link>https://Nextjingjing.github.io/blogs/microservice/04-query/</link><pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/04-query/</guid><description>&lt;h1 id="การทำ-query-ใน-microservice"&gt;การทำ Query ใน Microservice
 &lt;/h1&gt;
  &lt;blockquote&gt;
  &lt;p&gt;การ Query เพื่อขออ่านจากหลายๆ Databases เป็นเรื่องที่ท้าทายกว่า Monolith เพราะแต่ละ Service ใน Microservice นั้นต่างก็มี Database เป็นของตนเอง&lt;/p&gt;
@@ -69,7 +1077,8 @@
 &lt;h3 id="ลกษณะ-1"&gt;ลักษณะ
 &lt;/h3&gt;
  &lt;blockquote&gt;
- &lt;p&gt;Aggregate เราจะกล่าวกันต่อในบทหลังๆ&lt;/p&gt;
+ &lt;p&gt;Aggregate เราจะกล่าวกันต่อในบทหลังๆ อันนี้ไม่ใช่นิยามของมันที่ถูกต้อง แต่เพื่อให้เข้าง่ายๆ มอง Aggregate เป็น Database schema ไปก่อนก็ได้&lt;/p&gt;
+&lt;p&gt;ซึ่งเราจะเรียนแบบจริงจังในบทที่ 5&lt;/p&gt;
 
  &lt;/blockquote&gt;
 &lt;pre class="mermaid" style="visibility:hidden"&gt;graph TD
@@ -215,6 +1224,50 @@
 &lt;li&gt;ใช้ Pessimistic locking เช่น &lt;code&gt;SELECT ... FOR UPDATE;&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;ใช้ Optimistic locking เช็คว่า Version ตรงกับปัจจุบันหากไม่ตรงแสดงว่ามีคนเขียนก่อนเรา เช่น &lt;code&gt;WHERE version = current_version&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h4 id="การเพมและอพเดต-cqrs"&gt;การเพิ่มและอัพเดต CQRS
+&lt;/h4&gt;&lt;p&gt;ในวงจรการพัฒนามีโอกาสที่ต้องเพิ่มหรืออัพเดต CQRS เช่น อยากเปลี่ยน Database ฝั่ง Query-side เป็นต้น ต้องพิจารณาประเด็นดังต่อไปนี้&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ต้องมีการเก็บประวัติของ Events เก็บไว้ทั้งหมดใน Event store เพราะ Message broker ของ Event handler จะไม่ค่อยเก็บประวัติ เช่น Kafka จะเก็บไว้ชั่วคราว ไม่ถาวร
+&lt;ul&gt;
+&lt;li&gt;เมื่อเกิดการเพิ่มหรืออัพเดต อาจจะทำให้ต้องมา &lt;strong&gt;Replay&lt;/strong&gt; Events ใหม่บ้าง การเก็บประวัติจึงสำคัญ&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="การ-replay-events-ใหมประสทธภาพ"&gt;การ Replay events ให้มีประสิทธิภาพ
+&lt;/h4&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;การ Replay Event ต้องทำ Event store ก่อนด้วยนะ&lt;/em&gt; เพราะ Message Broker ที่คุณใช้อาจจะเป็น Stateless&lt;/p&gt;
+&lt;p&gt;ทำไมต้อง Replay events?&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;เพื่อเปลี่ยน Query database
+&lt;ul&gt;
+&lt;li&gt;เช่น เปลี่ยนจาก SQL เป็น No-SQL จำเป็นต้อง Replay events ใหม่ทั้งหมด&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;เพื่อรับประกันว่าเมื่อการแก้ไขข้อมูลจะสามารถย้อนกลับได้เมื่อทำผิด
+&lt;ul&gt;
+&lt;li&gt;เช่น เมื่อแก้ไขการคำนวณใหม่ของอะไรสักอย่าง แล้วจำเป็นต้องลบข้อมูลเก่า ต้อง Replay events และใช้สูตรใหม่นั้น เป็นต้น&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;เพื่อให้สามารถเพิ่ม Feature ใหม่ๆ โดยเมื่อทำผิดสามารถย้อนกลับไปได้
+&lt;ul&gt;
+&lt;li&gt;เช่น อยากทำระบบ Search ด้วย Elasticsearch ก็แค่ Reply events มาให้ Elasticsearch ไปทำงานต่อ&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+
+ &lt;/blockquote&gt;
+&lt;p&gt;บางครั้ง Event อาจจะมีจำนวนเยอะเกินจนการ Replay ทุกๆ Events อาจจะทำได้นานมากๆ ในบางครั้งเราอยาก Replay events แค่ภายใน 1 เดือน จะให้ Replay ทั้งหมดก็คงเสียเวลา จึงมีอัลกอริทึมที่ช่วยให้เร็วขึ้นดัง 2 วิธีต่อไป&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;เก็บ Snapshot เวอร์ชั่นปัจจุบันโดยต่อยอดจาก Snapshot เก่าๆ + Events ที่ไม่มีใน snapshot เพื่ออัพเดต โดยทำเป็นระยะๆ&lt;/li&gt;
+&lt;li&gt;นำ Snapshot ไปสร้าง Database ของฝั่ง Query-side + Event ที่ไม่มีใน snapshot เพื่ออัพเดต&lt;/li&gt;
+&lt;/ol&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;การ Replay events และ Event store เรื่องนี้เกี่ยวกับ Event Sourcing ซึ่งจะเป็นบทที่ 6&lt;/p&gt;
+
+ &lt;/blockquote&gt;
 &lt;div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;"&gt;
  &lt;div&gt;
  
@@ -332,7 +1385,7 @@
  S2--&gt;&gt;S1: Trigger Compensation
  S1-&gt;&gt;S1: Undo Actions (Compensate 1)
  
- Note over S1,S4: System back to Consistent State&lt;/pre&gt;&lt;p&gt;จากภาพจะเห็นว่าลำดับการทำงานของ SAGA คือ Order, Stock, Payment, Shipping แต่ที่ Shipping เกิดล้มเหลวขึ้นมา ลำดับการชดเชยจึงเป็น Payment, Stock, Order &lt;strong&gt;เป็นลำดับย้อน (Reverse Order)&lt;/strong&gt;&lt;/p&gt;
+ Note over S1,S4: System back to Consistent State&lt;/pre&gt;&lt;p&gt;จากภาพจะเห็นว่าลำดับการทำงานของ SAGA คือ Order, Stock, Payment, Shipping แต่ที่ Shipping เกิดล้มเหลวขึ้นมา ลำดับการชดเชยจึงเป็น Payment, Stock, Order &lt;strong&gt;เป็นลำดับย้อน (Reverse Order)&lt;/strong&gt; โดยจะส่งข้อความกลับไปหา Service ตัวก่อนๆ ให้ทำการชดเชย Record&lt;/p&gt;
 
  &lt;blockquote&gt;
  &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;

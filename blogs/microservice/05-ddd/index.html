@@ -1,0 +1,655 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design"><title>Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</title><link rel=canonical href=https://Nextjingjing.github.io/blogs/microservice/05-ddd/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/scss/style.min.4df4c8522cc0ad28c20cdfcea7f6cfa3a509d0c92276499cf4ceb49306afe6a1.css><meta property='og:title' content="Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design"><meta property='og:description' content="Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design"><meta property='og:url' content='https://Nextjingjing.github.io/blogs/microservice/05-ddd/'><meta property='og:site_name' content='Nextjingjing'><meta property='og:type' content='article'><meta property='article:section' content='Blogs'><meta property='article:tag' content='Microservice'><meta property='article:tag' content='Backend'><meta property='article:published_time' content='2026-04-18T00:00:00+00:00'><meta property='article:modified_time' content='2026-04-18T00:00:00+00:00'><meta name=twitter:title content="Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design"><meta name=twitter:description content="Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design"><link rel="shortcut icon" href=/img/profile.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/profile.png width=860 height=1063 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>😊</span></figure><div class=site-meta><h1 class=site-name><a href=/>Nextjingjing</a></h1><h2 class=site-description>Hello, I'm Nextjingjing. I'm interested in Development and DevOps, and I love sharing my knowledge through blogging.</h2></div></header><ol class=menu-social><li><a href=https://www.facebook.com/pruek.tanvorakul/ title=Facebook rel=me><svg width="800" height="800" viewBox="0 0 16 16" xmlns:xlink="http://www.w3.org/1999/xlink"><rect width="16" height="16" id="icon-bound" fill="none"/><path d="M15.117.0H.883C.395.0.0.395.0.883v14.234C0 15.605.395 16 .883 16h7.664V9.812H6.469V7.391h2.078V5.608c0-2.067 1.262-3.192 3.106-3.192.883.0 1.642.066 1.863.095v2.16l-1.271.001c-1.003.0-1.197.477-1.197 1.176v1.543h2.398l-.312 2.422h-2.086V16h4.07C15.605 16 16 15.605 16 15.117V.883C16 .395 15.605.0 15.117.0z"/></svg></a></li><li><a href=https://github.com/Nextjingjing title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://www.instagram.com/next_pruek/ title=Instagram. rel=me><svg width="800" height="800" viewBox="0 0 32 32" id="Camada_1" xmlns:xlink="http://www.w3.org/1999/xlink"><style>.st0{fill:#fff}</style><path d="M6 2h20c2.2.0 4 1.8 4 4v20c0 2.2-1.8 4-4 4H6c-2.2.0-4-1.8-4-4V6C2 3.8 3.8 2 6 2z"/><g><path class="st0" d="M21.3 9.7c-.6.0-1.2.5-1.2 1.2s.5 1.2 1.2 1.2 1.2-.5 1.2-1.2C22.4 10.2 21.9 9.7 21.3 9.7z"/><path class="st0" d="M16 11.2c-2.7.0-4.9 2.2-4.9 4.9.0 2.7 2.2 4.9 4.9 4.9s4.9-2.2 4.9-4.9C21 13.4 18.8 11.2 16 11.2zm0 8.1c-1.7.0-3.2-1.4-3.2-3.2.0-1.7 1.4-3.2 3.2-3.2 1.7.0 3.2 1.4 3.2 3.2s-1.4 3.2-3.2 3.2z"/><path class="st0" d="M20 6h-8c-3.3.0-6 2.7-6 6v8c0 3.3 2.7 6 6 6h8c3.3.0 6-2.7 6-6v-8c0-3.3-2.7-6-6-6zm4.1 14c0 2.3-1.9 4.1-4.1 4.1h-8c-2.3.0-4.1-1.9-4.1-4.1v-8c0-2.3 1.9-4.1 4.1-4.1h8c2.3.0 4.1 1.9 4.1 4.1v8z"/></g></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/page/about/><svg class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>About</span></a></li><li><a href=/page/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/page/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#business-logic-design-patterns>Business logic design patterns</a></li><li><a href=#transaction-script-pattern>Transaction script pattern</a><ol><li><a href=#ลกษณะ>ลักษณะ</a></li><li><a href=#ปญหา>ปัญหา</a></li></ol></li><li><a href=#domain-model-pattern>Domain model pattern</a><ol><li><a href=#ลกษณะ-1>ลักษณะ</a></li><li><a href=#ขอด>ข้อดี</a></li><li><a href=#ขอเสย>ข้อเสีย</a></li><li><a href=#domain-driven-design-ddd>Domain-Driven Design (DDD)</a></li></ol></li><li><a href=#aggregate-pattern>Aggregate pattern</a><ol><li><a href=#ลกษณะ-2>ลักษณะ</a></li><li><a href=#กฎของ-aggregate>กฎของ Aggregate</a><ol><li><a href=#reference-ไดแค-aggregate-root-เทานน>Reference ได้แค่ Aggregate root เท่านั้น</a></li><li><a href=#reference-ผาน-identity-เทานน>Reference ผ่าน Identity เท่านั้น</a></li><li><a href=#ม-1-transaction-ตอการสรางหรออพเดต-1-aggregate-เทานน>มี 1 Transaction ต่อการสร้างหรืออัพเดต 1 Aggregate เท่านั้น</a></li></ol></li></ol></li><li><a href=#domain-events-pattern>Domain events pattern</a><ol><li><a href=#ความหมายของ-event>ความหมายของ Event</a></li><li><a href=#ลกษณะ-3>ลักษณะ</a><ol><li><a href=#การ-publish-domain-event>การ Publish Domain event</a></li></ol></li></ol></li><li><a href=#กลยทธการออกแบบ-service>กลยุทธ์การออกแบบ Service</a><ol><li><a href=#การรวบรวม-functional-requirements>การรวบรวม Functional requirements</a><ol><li><a href=#uml-diagram-ทมประโยชน>UML diagram ที่มีประโยชน์</a></li></ol></li><li><a href=#ออกแบบ-domain-model>ออกแบบ Domain model</a><ol><li><a href=#uml-diagram-ทมประโยชน-1>UML diagram ที่มีประโยชน์</a></li></ol></li><li><a href=#การนยาม-service-โดยการ-decompose-by-subdomain-pattern>การนิยาม Service โดยการ Decompose by subdomain pattern</a><ol><li><a href=#domain-คออะไร>Domain คืออะไร?</a></li><li><a href=#bounded-context-คออะไร>Bounded context คืออะไร?</a></li><li><a href=#ubiquitous-language>Ubiquitous Language</a></li><li><a href=#คำแนะนำ>คำแนะนำ</a></li></ol></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/blogs/ style=background-color:#efbed3;color:#3d0f23>Blogs</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/blogs/microservice/05-ddd/>Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</a></h2><h3 class=article-subtitle>Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</h3></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-04-18T00:00:00Z>Saturday, April 18, 2026</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>12 minutes read</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>Table of contents</span></div></summary><nav class=toc-nav><ol><li><a href=#business-logic-design-patterns>Business logic design patterns</a></li><li><a href=#transaction-script-pattern>Transaction script pattern</a><ol><li><a href=#ลกษณะ>ลักษณะ</a></li><li><a href=#ปญหา>ปัญหา</a></li></ol></li><li><a href=#domain-model-pattern>Domain model pattern</a><ol><li><a href=#ลกษณะ-1>ลักษณะ</a></li><li><a href=#ขอด>ข้อดี</a></li><li><a href=#ขอเสย>ข้อเสีย</a></li><li><a href=#domain-driven-design-ddd>Domain-Driven Design (DDD)</a></li></ol></li><li><a href=#aggregate-pattern>Aggregate pattern</a><ol><li><a href=#ลกษณะ-2>ลักษณะ</a></li><li><a href=#กฎของ-aggregate>กฎของ Aggregate</a><ol><li><a href=#reference-ไดแค-aggregate-root-เทานน>Reference ได้แค่ Aggregate root เท่านั้น</a></li><li><a href=#reference-ผาน-identity-เทานน>Reference ผ่าน Identity เท่านั้น</a></li><li><a href=#ม-1-transaction-ตอการสรางหรออพเดต-1-aggregate-เทานน>มี 1 Transaction ต่อการสร้างหรืออัพเดต 1 Aggregate เท่านั้น</a></li></ol></li></ol></li><li><a href=#domain-events-pattern>Domain events pattern</a><ol><li><a href=#ความหมายของ-event>ความหมายของ Event</a></li><li><a href=#ลกษณะ-3>ลักษณะ</a><ol><li><a href=#การ-publish-domain-event>การ Publish Domain event</a></li></ol></li></ol></li><li><a href=#กลยทธการออกแบบ-service>กลยุทธ์การออกแบบ Service</a><ol><li><a href=#การรวบรวม-functional-requirements>การรวบรวม Functional requirements</a><ol><li><a href=#uml-diagram-ทมประโยชน>UML diagram ที่มีประโยชน์</a></li></ol></li><li><a href=#ออกแบบ-domain-model>ออกแบบ Domain model</a><ol><li><a href=#uml-diagram-ทมประโยชน-1>UML diagram ที่มีประโยชน์</a></li></ol></li><li><a href=#การนยาม-service-โดยการ-decompose-by-subdomain-pattern>การนิยาม Service โดยการ Decompose by subdomain pattern</a><ol><li><a href=#domain-คออะไร>Domain คืออะไร?</a></li><li><a href=#bounded-context-คออะไร>Bounded context คืออะไร?</a></li><li><a href=#ubiquitous-language>Ubiquitous Language</a></li><li><a href=#คำแนะนำ>คำแนะนำ</a></li></ol></li></ol></li></ol></nav></details></aside><section class=article-content><h1 id=domain-driven-design>Domain Driven Design</h1><blockquote><p>Domain Driven Design เป็นศาสตร์ที่ช่วยในการออกแบบ Business logic และช่วยหาว่าเราต้องมี Service อะไรบ้างใน Microservices</p></blockquote><h2 id=business-logic-design-patterns>Business logic design patterns</h2><ul><li>Transaction script</li><li>Domain model</li><li>Aggregate</li><li>Domain event</li><li>Event sourcing (บทที่ 6 เราจะพูดถึง)</li></ul><h2 id=transaction-script-pattern>Transaction script pattern</h2><h3 id=ลกษณะ>ลักษณะ</h3><p>Transaction script pattern คือ Business logic model แบบที่เราคุ้นเคยมากที่สุด โดยมีข้อสังเกตคือมันจะแบ่งให้ Class มี Behavior อย่างเดียวหรือ State อย่างเดียว</p><pre class=mermaid style=visibility:hidden>classDiagram
+    class Account {
+        +int accountId
+        +String ownerName
+        +double balance
+    }
+
+    class AccountRepository {
+        +find(id: int) Account
+        +update(account: Account) void
+        +save(account: Account) void
+    }
+
+    class AccountService {
+        -AccountRepository repository
+        +deposit(accountId: int, amount: double) void
+        +withdraw(accountId: int, amount: double) void
+        +transfer(fromId: int, toId: int, amount: double) void
+    }
+
+    AccountService --> AccountRepository : uses
+    AccountService ..> Account : manipulates
+    AccountRepository ..> Account : returns/persists</pre><ul><li><code>AccountService</code> มีแค่ Behavior</li><li><code>AccountRepository</code> มีแค่ Behavior</li><li><code>Account</code> มีแค่ State ไม่มี Behavior</li></ul><h3 id=ปญหา>ปัญหา</h3><ul><li>หาก Business logic ซับซ้อนจะไม่เหมาะสม ได้แก่<ul><li>Big Ball of Mud ยิ่งระบบโตทำให้โค้ดยาวเป็นก้อนโคนยักษ์จนอ่านไม่ออก เช่น Business logic อยู่ในที่ Service หมดเลยที่เดียวทำให้อ่านยาวนาน ตอนแรกโคลนอาจจะไม่โต แต่นานๆ เข้าโคลนก้อนนั้นจะโตขึ้น</li><li>Duplicated code เกิดการซ้ำซ้อนของโค้ด เช่น</li></ul></li></ul><pre class=mermaid style=visibility:hidden>classDiagram
+    class RetailOrderService {
+        +checkout(orderId)
+    }
+    class CorporateOrderService {
+        +processBulkOrder(orderId)
+    }
+    class Order {
+        +double amount
+        +String status
+    }
+
+    note for RetailOrderService "ภาษี = amount * 0.07"
+    note for CorporateOrderService "ภาษี = amount * 0.07"
+
+    RetailOrderService ..> Order : ดึงข้อมูลไปคำนวณ
+    CorporateOrderService ..> Order : ดึงข้อมูลไปคำนวณ</pre><p><code>ภาษี = amount * 0.07</code> หากอยากแก้เป็น <code>ภาษี = amount * 0.10</code> เราต้องแก้ทั้งสอง Service เลย ทางแก้คือเราสามารถทำให้เป็นแบบ</p><pre class=mermaid style=visibility:hidden>classDiagram
+    class Order {
+        +double amount
+        +String status
+        +calculateTax() double
+    }
+    class RetailOrderService {
+        +checkout(orderId)
+    }
+    class CorporateOrderService {
+        +processBulkOrder(orderId)
+    }
+
+    note for Order "มีคำนวณภาษีให้"
+
+    RetailOrderService ..> Order : สั่งให้ Order คำนวณ
+    CorporateOrderService ..> Order : สั่งให้ Order คำนวณ</pre><p>แบบนี้คือเราสามารถแก้การคำนวณภาษีที่จุดเดียว ไม่ต้องแก้สองจุดและนี้แหละคือสิ่งที่ Domain model จะทำให้เราในจุดนี้ และทำให้ Business logic ไม่ไปอยู่ที่ Service&rsquo;s logic แค่จุดเดียว</p><h2 id=domain-model-pattern>Domain model pattern</h2><h3 id=ลกษณะ-1>ลักษณะ</h3><p>Domain model pattern คือ Business logic model ที่มี Learning curve สูงเรียนรู้ยาก แต่ทำให้ Business logic ไม่เกิด Big Ball of Mud และ Duplicated code โดยมีข้อสังเกตคือมันจะแบ่งให้ Class มี Behavior อย่างเดียวหรือ State อย่างเดียวหรือมีทั้งสองอย่างเลย</p><pre class=mermaid style=visibility:hidden>classDiagram
+    class Account {
+        <<entity>>
+        +int accountId
+        +String ownerName
+        +double balance
+        +deposit(amount: double) void
+        +withdraw(amount: double) void
+        -setBalance(amount: double) void
+    }
+
+    class AccountRepository {
+        <<repository>>
+        +find(id: int) Account
+        +save(account: Account) void
+    }
+
+    class BankingService {
+        <<service>>
+        -AccountRepository repository
+        +transfer(fromId: int, toId: int, amount: double) void
+    }
+
+    BankingService --> AccountRepository : uses
+    BankingService ..> Account : coordinates
+    AccountRepository ..> Account : persists</pre><ul><li><code>Account</code> มีทั้ง Behavior และ State</li><li><code>AccountRepository</code> มีแค่ Behavior</li><li><code>BankingService</code> มีแค่ Behavior</li></ul><p>จุดที่แตกต่างกันคือ <code>Account</code>, <code>AccountService</code> และ <code>BankingService</code> เราย้ายบางอย่างไปอยู่ใน <code>Account</code> แทนคือ <code>deposit()</code> และ <code>withdraw()</code></p><h3 id=ขอด>ข้อดี</h3><ul><li>แก้ปัญหาที่เกิดใน Transaction script pattern ได้ดี</li><li>ใช้งานในระบบใหญ่ๆ ซับซ้อนได้ดี</li></ul><h3 id=ขอเสย>ข้อเสีย</h3><ul><li>Learning curve สูง</li></ul><h3 id=domain-driven-design-ddd>Domain-Driven Design (DDD)</h3><p>DDD ได้มอบรูปแบบของ Domain model เป็นประเภทของ Class ดังต่อไปนี้</p><ol><li>Entity เป็นคลาสที่มีทั้ง Behavior และ State และ <strong>มี Identity</strong> เช่น id<ul><li>Entity A แม้นจะเหมือน Entity B (id ห้ามเหมือน) แต่ก็ไม่ใช่สิ่งเดียวกัน</li></ul></li></ol><p>เช่น บัญชีเงินฝากนาย A มีเงิน 100 บาท ไม่ใช่สิ่งเดียวกับบัญชีนาย B ที่มีเงิน 100 บาทเท่ากัน</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>Account</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>id</span><span class=p>;</span><span class=w>      </span><span class=c1>// Identity</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>ownerName</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>Money</span><span class=w> </span><span class=n>balance</span><span class=p>;</span><span class=w>        </span><span class=c1>// Value Object</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Constructor</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>Account</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>id</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>ownerName</span><span class=p>,</span><span class=w> </span><span class=n>Money</span><span class=w> </span><span class=n>initialBalance</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>id</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Objects</span><span class=p>.</span><span class=na>requireNonNull</span><span class=p>(</span><span class=n>id</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>ownerName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ownerName</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>initialBalance</span><span class=p>.</span><span class=na>amount</span><span class=p>()</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>0</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>IllegalArgumentException</span><span class=p>(</span><span class=s>&#34;Cannot open an account with a negative balance&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Entity&#39;s Behavior</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>withdraw</span><span class=p>(</span><span class=n>Money</span><span class=w> </span><span class=n>amount</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>balance</span><span class=p>.</span><span class=na>isLessThan</span><span class=p>(</span><span class=n>amount</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Exception</span><span class=p>(</span><span class=s>&#34;Insufficient funds&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>balance</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>balance</span><span class=p>.</span><span class=na>subtract</span><span class=p>(</span><span class=n>amount</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Getters</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>getId</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=n>id</span><span class=p>;</span><span class=w> </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Money</span><span class=w> </span><span class=nf>getBalance</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=n>balance</span><span class=p>;</span><span class=w> </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ol start=2><li>Value Object (VO) เป็นคลาสที่มีทั้ง Behavior และ State <strong>ไม่มี Identity</strong><ul><li>Entity A เหมือน Entity B เราสามารถพูดได้ว่า A = B</li></ul></li></ol><p>เช่น เงิน 100 บาท = เงิน 100 บาท</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>record</span> <span class=nc>Money</span><span class=p>(</span><span class=kt>long</span><span class=w> </span><span class=n>amount</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>currency</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Money</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>amount</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>0</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>IllegalArgumentException</span><span class=p>(</span><span class=s>&#34;Amount cannot be negative&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Money</span><span class=w> </span><span class=nf>subtract</span><span class=p>(</span><span class=n>Money</span><span class=w> </span><span class=n>other</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Money</span><span class=p>(</span><span class=k>this</span><span class=p>.</span><span class=na>amount</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>other</span><span class=p>.</span><span class=na>amount</span><span class=p>(),</span><span class=w> </span><span class=k>this</span><span class=p>.</span><span class=na>currency</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>boolean</span><span class=w> </span><span class=nf>isLessThan</span><span class=p>(</span><span class=n>Money</span><span class=w> </span><span class=n>other</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>this</span><span class=p>.</span><span class=na>amount</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>other</span><span class=p>.</span><span class=na>amount</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ol start=3><li><p>Factory เป็นคลาสหรือเมธอดที่ใช้สร้าง Object จาก Class ต่างๆ เพราะเราจะไม่สร้าง Objectตรงๆ</p><ul><li>เพราะอาจจะละเมิด Business Rule ได้ เช่น ตั้งค่าเงินในบัญชีให้ติดลบ</li><li>เพราะบางครั้งการสร้าง Object มีความซับซ้อนเกินไป จึงต้องมีตัวช่วยสร้าง</li></ul></li><li><p>Repository เป็นคลาสที่ถูกสร้างมาเพื่อบันทึก Entity, Value object ลง Database หรือจะ Query หรือ Update ก็ได้ในคลาสนี้</p></li><li><p>Service เป็นคลาสที่มีแต่ Behavior ที่ไม่ควรจะอยู่ใน Entity หรือ Value Object</p></li></ol><h2 id=aggregate-pattern>Aggregate pattern</h2><p>ในช่วงแรกๆ เราจะออกแบบ Domain model แบบคร่าวๆ โดยมีแค่ Entity และ Value object ก่อน ขอยกตัวอย่างการออกแบบในระบบ E-commerce เราสามารถออกแบบ Domain model ได้ดังนี้</p><pre class=mermaid style=visibility:hidden>classDiagram
+    direction LR
+
+    class Customer {
+        +int id
+        +string name
+        +string email
+        +Address address
+        +getHistory() List~Order~
+        +updateProfile(string name, Address addr)
+    }
+
+    class Product {
+        +int id
+        +string name
+        +Money price
+        +int stock
+        +isAvailable(int quantity) bool
+        +reduceStock(int quantity)
+        +updatePrice(Money newPrice)
+    }
+
+    class Order {
+        +int id
+        +int customerId
+        +DateTime orderDate
+        +string status
+        +Money totalAmount
+        +calculateTotal() Money
+        +updateStatus(string newStatus)
+        +cancel()
+    }
+
+    class OrderItem {
+        +int id
+        +int orderId
+        +int productId
+        +int quantity
+        +Money unitPrice
+        +getSubtotal() Money
+    }
+
+    class Address {
+        +string street
+        +string city
+        +string postalCode
+        +getFullAddress() string
+    }
+
+    class Money {
+        +decimal amount
+        +string currency
+        +add(Money other) Money
+        +multiply(int factor) Money
+    }
+
+    %% Relationships
+    Customer "1" --> "*" Order : places
+    Order "1" --> "*" OrderItem : contains
+    Product "1" --> "*" OrderItem : part of
+
+    %% VO Composition
+    Customer *-- Address
+    Product *-- Money
+    Order *-- Money
+    OrderItem *-- Money</pre><p>เนื่องจากเราใช้ Microservice เราจึงต้องจัดกลุ่มแบ่ง Sub Domain model ออกเป็นในหลายๆ Service ซึ่ง DDD ได้เรียกกลุ่มของโมเดลพวกนั้นว่า <strong>Aggregate</strong></p><pre class=mermaid style=visibility:hidden>graph TB
+    %% Customer Aggregate
+    subgraph Customer_Aggregate [Customer Aggregate]
+        direction TB
+        C_Root[Customer Root]
+        C_Addr[Address VO]
+        C_Root --- C_Addr
+    end
+
+    %% Product Aggregate
+    subgraph Product_Aggregate [Product Aggregate]
+        direction TB
+        P_Root[Product Root]
+        P_Money[Money VO]
+        P_Root --- P_Money
+    end
+
+    %% Order Aggregate
+    subgraph Order_Aggregate [Order Aggregate]
+        direction TB
+        O_Root[Order Root]
+        O_Item[OrderItem Entity]
+        O_Money[Money VO]
+        OI_Money[Money VO]
+        
+        O_Root --- O_Item
+        O_Root --- O_Money
+        O_Item --- OI_Money
+    end
+
+    %% Styling
+    style Customer_Aggregate fill:#fdfefe,stroke:#2e86c1,stroke-width:2px,stroke-dasharray: 5 5
+    style Product_Aggregate fill:#fdfefe,stroke:#d35400,stroke-width:2px,stroke-dasharray: 5 5
+    style Order_Aggregate fill:#fdfefe,stroke:#27ae60,stroke-width:2px,stroke-dasharray: 5 5
+    
+    style C_Root fill:#ebf5fb,stroke:#2e86c1,stroke-width:2px
+    style P_Root fill:#fef5e7,stroke:#d35400,stroke-width:2px
+    style O_Root fill:#eafaf1,stroke:#27ae60,stroke-width:2px</pre><blockquote><p><strong>Important Note</strong> 📝:</p><p>Aggregate ไม่เท่ากับ Service นะ</p><p>1 Service อาจจะมีหลายๆ Aggregate ก็ได้</p></blockquote><h3 id=ลกษณะ-2>ลักษณะ</h3><blockquote><p><strong>Important Note</strong> 📝:</p><p><strong>Aggregate pattern</strong> คือการจัดระเบียบ Domain Model ให้อยู่ในรูปแบบของกลุ่มก้อน (Aggregates) โดยที่แต่ละกลุ่มก้อนจะประกอบด้วยชุดของ Object ต่างๆ (Entity, Value object) และจะถูกปฏิบัติหรือจัดการเสมือนว่า<strong>เป็นหน่วยเดียวกัน</strong> (Unit)"</p><p>แต่ละ Aggregate ต้องมี Object ตัวแทนที่เรียกว่า <strong>Root</strong> โดยพิจารณาจากตัวที่ใหญ่ที่สุด และเหมาะสมที่จะเป็น Single Entry Point (จุดเข้าทางเดียว) เพื่อ Ref. ไปหา Object อื่นๆ</p></blockquote><p>เช่น จากรูปด้านบนเราจะเรียก Order Aggregate จะเป็นมวลรวมของ Order, OrderItem, Money เป็นต้น</p><blockquote><p>นอกจากนี้ DDD ยังได้มอบกฎของ Aggregate เพื่อทำให้เกิด Consistency ของข้อมูล</p></blockquote><h3 id=กฎของ-aggregate>กฎของ Aggregate</h3><h4 id=reference-ไดแค-aggregate-root-เทานน>Reference ได้แค่ Aggregate root เท่านั้น</h4><p>ทำไมจึงมีกฏข้อนี้สมมุติว่ามีคลาสดังนี้</p><ul><li><code>Account</code> เป็น <strong>Root</strong> และมี <code>withdraw()</code> เพื่อถอนเงินโดยมี Business rule ว่าห้ามถอนเงินเกินยอดเงินที่มี</li><li><code>Account</code> มี <code>Money</code> เป็น Value object</li></ul><p>หากคุณไม่ยอมใช้ <code>account.withdraw()</code> แล้วไปยุ่งกับ <code>Money</code> ตรงๆ คุณอาจจะเผลอที่จะละเมิด Business rule โดยการถอนเงินเกินที่มีได้ เป็นต้น</p><h4 id=reference-ผาน-identity-เทานน>Reference ผ่าน Identity เท่านั้น</h4><p>เราจะไม่ Ref. ด้วย Object แต่จะ Ref. ด้วย Identity เช่น Primary key นั้นก็เพื่อให้เกิด Loose Coupling เช่น <code>Order</code> จะ Ref. <code>Customer</code> ผ่าน <code>customerId</code> เท่านั้น ลองคิดว่า Order service มี Order aggregate และ Customer service มี Customer aggregate หาก Order service จะ Ref. <code>Customer</code> แบบ Object หมายความว่ามันก็ต้องมี Customer aggregate ด้วย (หมายถึงก็ต้องเขียนโค้ด Domain model เพิ่มไปอีก)</p><p>ปัญหาที่ตามมาคือลองนึกภาพว่า Domain model ของ <code>Customer</code> เปลี่ยนความซวยจะบังเกิดคุณต้องเปลี่ยนที่ Order service และ Customer service ทั้งสองที่ ทำให้ลำบากในการแก้ไข</p><h4 id=ม-1-transaction-ตอการสรางหรออพเดต-1-aggregate-เทานน>มี 1 Transaction ต่อการสร้างหรืออัพเดต 1 Aggregate เท่านั้น</h4><p>กฎข้อนี้บอกว่าหากเราจะทำการสร้างหรืออัพเดต 1 Aggregate ทำได้แค่ 1 Transaction เท่านั้น ซึ่งดีกับ Saga pattern มากๆ เพราะ Saga pattern มันก็ทำเช่นนั้นอยู่แล้ว อีกทั้งยัง<strong>ทำให้แต่ละ Service เป็นอิสระต่อกัน (Decoupled)</strong> เช่น หาก Aggregate ที่ช้ามากๆ อยู่ใน Transaction เดียวกับ Aggregate ที่เร็วมากๆ จะทำให้ทั้งหมดช้าไปเลย</p><p>แต่มันมีประเด็นที่น่าสนใจอยู่เช่น Service บางตัวอาจมีมากกว่า 1 Aggregate</p><pre class=mermaid style=visibility:hidden>graph TD
+    subgraph Saga ["Saga (Distributed Transaction)"]
+        direction LR
+        
+        subgraph ServiceA ["Service A"]
+            T1["Local transaction 1"]
+            X["Aggregate X"]
+            T1 -->|Create/update| X
+        end
+
+        subgraph ServiceB ["Service B"]
+            T2["Local transaction 2"]
+            Y["Aggregate Y"]
+            T3["Local transaction 3"]
+            Z["Aggregate Z"]
+            
+            T2 -->|Create/update| Y
+            T3 -->|Create/update| Z
+        end
+
+        %% Connections between transactions
+        T1 --> T2
+        T2 --> T3
+    end
+
+    %% Styling
+    style Saga fill:none,stroke:#333,stroke-dasharray: 5 5
+    style ServiceA fill:#e0f7fa,stroke:#333
+    style ServiceB fill:#e0f7fa,stroke:#333
+    style X fill:#fff59d,stroke:#333
+    style Y fill:#fff59d,stroke:#333
+    style Z fill:#fff59d,stroke:#333
+    style T1 fill:#fff,stroke:#333
+    style T2 fill:#fff,stroke:#333
+    style T3 fill:#fff,stroke:#333</pre><p>จะเห็นว่า Service B มี Y, Z เป็น Aggregate ซึ่งจุดนี้จะทำให้เราเขียนโค้ดได้ลำบากขึ้นเพราะต้องปฏิบัติตามกฎของ DDD: Aggregate rule</p><ul><li><strong>ทางเลือกคนดี</strong> ใช้ Saga pattern แม้นจะใน Service B จะมี Y, Z อยู่แล้วเราก็ต้อง สร้าง/อัพเดต Y แล้วส่ง Message/Event ไปบอกตัวเองให้ทำ สร้าง/อัพเดต Z ต่อไป<ul><li>ส่งผ่าน Message broker เพื่อความน่าเชื่อถือ เช่น ไฟดับหากไม่เก็บใน Message broker แล้ว Event จะหายไปตลอดกาล</li></ul></li><li><strong>ทางเลือกคนฉลาดดี</strong> ถ้ารวม Y, Z เป็น Aggregate เดียวกันได้ก็ดีจบปัญหาเลย</li><li><strong>ทางเลือกคนเลว</strong> โกงสร้าง/อัพเดต Y, Z ใน 1 Transaction ไปเลย แต่แหกกฎของ DDD: Aggregate rule<ul><li>ข้อดี = ง่าย</li><li>ข้อเสีย<ul><li>การขยายระบบทำได้ยาก เช่น Y ทำได้เร็วกว่า Z มาก แต่ต้องช้าเพราะผูกใน Transaction เดียวกัน</li><li>ใช้ NoSql ไม่ได้ เช่น MongoDB สามารถทำ Atomicity แค่ภายใน Document เดียวกัน</li></ul></li></ul></li></ul><h2 id=domain-events-pattern>Domain events pattern</h2><h3 id=ความหมายของ-event>ความหมายของ Event</h3><p>ในบริบทของ DDD นั้น Domain events หมายถึงเหตุการณ์ที่เกิดขึ้นเมื่อมีการสร้าง/อัพเดต Aggregate</p><p>เช่น Order aggregate สามารถมี Event ได้แก่</p><ul><li>OrderCreated</li><li>OrderCancelled</li><li>OrderShipped</li><li>&mldr;</li></ul><p>เป็นต้น</p><blockquote><p><strong>Important Note</strong> 📝:</p><p><strong>Domain event pattern</strong>: Aggregate สามารถ publish domain event เมื่อ Aggregate นั้นๆ ถูกสร้างหรือเกิดการอัพเดตที่สำคัญ</p></blockquote><h3 id=ลกษณะ-3>ลักษณะ</h3><p>เรามาดูว่ามันทำงานอย่างไรกันในตัวอย่างการสร้าง Order แล้วส่ง Event ไปให้ Email Service ส่งอีเมลบอกลูกค้า</p><pre class=mermaid style=visibility:hidden>sequenceDiagram
+    participant Agg as Aggregate (Order)
+    participant DB as Database
+    participant Broker as Message Broker (RabbitMQ/Kafka)
+    participant Sub as Subscriber (Email Service)
+
+    Note over Agg, DB: [Transaction Boundary]
+    Agg->>Agg: 1. เปลี่ยนสถานะ (State Change)
+    Agg->>DB: 2. บันทึกข้อมูล & Outbox Event
+    
+    Note over DB, Broker: [Relay Process]
+    DB-->>Broker: 3. ส่ง Event ไปยัง Broker
+    
+    Note over Broker, Sub: [Asynchronous Delivery]
+    Broker->>Sub: 4. Push/Pull Event
+    Sub->>Sub: 5. ส่ง Email ให้ลูกค้า</pre><p>จะเห็นว่าตัวอย่างนี้มีการใช้ <strong>Outbox pattern</strong> (จากบทที่ 2) เพื่อให้การบันทึกข้อมูลและส่งข้อความแบบ Atomic</p><p>เรามาดูโค้ดคร่าวๆ กัน</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>interface</span> <span class=nc>DomainEvent</span><span class=w> </span><span class=p>{}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>เราสร้าง Interface ที่มีชื่อว่า <code>DomainEvent</code> ทีนี้สิ่งที่เราควรทำต่อมาคือการฝัง Metadata ให้ Event ของเรา</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>class</span> <span class=nc>DomainEventEnvelope</span><span class=o>&lt;</span><span class=n>T</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>DomainEvent</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>aggregateType</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>aggregateId</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>T</span><span class=w> </span><span class=n>event</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>...</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Constructor</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>DomainEventEnvelope</span><span class=w> </span><span class=p>(...)</span><span class=w> </span><span class=p>{...}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>เราใช้ Generic type T ซึ่งต้อง implement มาจาก Interface <code>DomainEvent</code></p><p>ต่อไปเราจะสร้าง OrderCreated ซึ่งจะ Publish เมื่อมีการสร้าง Order aggregate โดยจะ implement มาจาก Interface <code>DomainEvent</code></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>class</span> <span class=nc>OrderCreated</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>DomainEvent</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>orderId</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>customerId</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>Double</span><span class=w> </span><span class=n>totalAmount</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>OrderItem</span><span class=o>&gt;</span><span class=w> </span><span class=n>items</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>status</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Constructor</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>OrderCreated</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>orderId</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>customerId</span><span class=p>,</span><span class=w> </span><span class=n>Double</span><span class=w> </span><span class=n>totalAmount</span><span class=p>,</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>OrderItem</span><span class=o>&gt;</span><span class=w> </span><span class=n>items</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>status</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>orderId</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>orderId</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>...</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Getter Setter</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>getOrderId</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=n>orderId</span><span class=p>;</span><span class=w> </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>...</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>ตอนนี้เรามี <code>OrderCreated</code> เนื่องจาก Event ตัวนี้มันต้องการที่จะถูก Publish เมื่อ Aggregate ถูกสร้างเรามาดูกันว่ามันจะเป็นไง</p><h4 id=การ-publish-domain-event>การ Publish Domain event</h4><p>Order Aggregate</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>Order</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>id</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>customerId</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>Double</span><span class=w> </span><span class=n>totalAmount</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>OrderStatus</span><span class=w> </span><span class=n>status</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>OrderItem</span><span class=o>&gt;</span><span class=w> </span><span class=n>items</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Event&#39;s List</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>DomainEvent</span><span class=o>&gt;</span><span class=w> </span><span class=n>domainEvents</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ArrayList</span><span class=o>&lt;&gt;</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Constructor</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>Order</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>customerId</span><span class=p>,</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>OrderItem</span><span class=o>&gt;</span><span class=w> </span><span class=n>items</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>id</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>UUID</span><span class=p>.</span><span class=na>randomUUID</span><span class=p>().</span><span class=na>toString</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>...</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Create event</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>domainEvents</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>OrderCreated</span><span class=p>(</span><span class=k>this</span><span class=p>.</span><span class=na>id</span><span class=p>,</span><span class=w> </span><span class=k>this</span><span class=p>.</span><span class=na>customerId</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Get Events</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>DomainEvent</span><span class=o>&gt;</span><span class=w> </span><span class=nf>getDomainEvents</span><span class=p>()</span><span class=w> </span><span class=p>{...}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Clear Events</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>clearDomainEvents</span><span class=p>()</span><span class=w> </span><span class=p>{...}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// Another Getter, Setter</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>...</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>สังเกตว่าเราจะสร้าง <code>private final List&lt;DomainEvent> domainEvents = new ArrayList&lt;>();</code> มาเก็บ Event ที่สร้างเป็น ArrayList เพราะอาจจะมีหลายๆ Events ได้ และตอนที่ Aggregate ถูกสร้าง (บรรทัดที่ 16 <code>this.domainEvents.add(...)</code>) เราก็มีการเอา Event มาเก็บใน Order aggregate ตัวนี้</p><p>ในขั้นตอนต่อไปคือการบันทึก Aggregate ลง Database และทำ Outbox pattern กัน</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@Service</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>OrderAppService</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Autowired</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>OrderRepository</span><span class=w> </span><span class=n>orderRepository</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Autowired</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>OutboxRepository</span><span class=w> </span><span class=n>outboxRepository</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Transactional</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>createOrder</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>customerId</span><span class=p>,</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>OrderItem</span><span class=o>&gt;</span><span class=w> </span><span class=n>items</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Order</span><span class=w> </span><span class=n>order</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Order</span><span class=p>(</span><span class=n>customerId</span><span class=p>,</span><span class=w> </span><span class=n>items</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>orderRepository</span><span class=p>.</span><span class=na>save</span><span class=p>(</span><span class=n>order</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=n>DomainEvent</span><span class=w> </span><span class=n>event</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>order</span><span class=p>.</span><span class=na>getDomainEvents</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>DomainEventEnvelope</span><span class=o>&lt;</span><span class=n>OrderCreated</span><span class=o>&gt;</span><span class=w> </span><span class=n>envelope</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>DomainEventEnvelope</span><span class=o>&lt;&gt;</span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=s>&#34;Order&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>order</span><span class=p>.</span><span class=na>getId</span><span class=p>(),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>event</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>outboxRepository</span><span class=p>.</span><span class=na>save</span><span class=p>(</span><span class=n>envelope</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>order</span><span class=p>.</span><span class=na>clearDomainEvents</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><ul><li><code>class OrderAppService</code> ซึ่งมันเป็น Application service ไม่ใช่ Domain service ใน Domain model ผมจึงใช้ชื่อ <strong>OrderAppService</strong></li><li><code>orderRepository</code> ใช้บันทึกข้อมูลลง Order ลง Database</li><li><code>outboxRepository</code> ใช้บันทึก Event ลง Database</li><li><code>@Transactional</code> เราจะทำบันทึก Database ทั้ง Order aggregate และ Event (Outbox) ไปคู่กันใน Transaction เดียวกัน (ตามทฤษฎีบทที่ 2 <strong>Outbox pattern</strong>)<ul><li>บรรทัดที่ 11 <code>Order order = new Order(customerId, items);</code> ได้ทำการสร้าง Event ใส่ใน <code>order.domainEvents</code> นั้นเอง ซึ่งมันเป็น Private และต้องเรียกผ่าน <code>order.getDomainEvents()</code> เท่านั้น</li><li>จากบทที่ 2 เมื่อบันทึก Event ลง Outbox table แล้ว เราจะให้ Relay ไปอ่าน Outbox table เพื่อส่งข้อความไปให้ Service อื่นๆ</li></ul></li></ul><h2 id=กลยทธการออกแบบ-service>กลยุทธ์การออกแบบ Service</h2><p>ในหัวข้อนี้เราจะมาดูวิธีการในการกำหนดออกแบบว่า Microservice ของเราจำเป็นต้องมี Service อะไรบ้าง?</p><h3 id=การรวบรวม-functional-requirements>การรวบรวม Functional requirements</h3><p>เราจะใช้เทคนิคที่เรียกว่า <strong>User story</strong> ในการสร้าง Functional requirements โดยแต่งนิทาน เช่น</p><blockquote><p><strong>ในฐานะ (As a/an)</strong> <code>Consumer</code>
+<strong>ฉันต้องการ (I want to)</strong> ที่จะสั่งซื้อสินค้า <code>Place Order</code> <strong>เพื่อที่จะ (So that)</strong> <code>บอกระบบว่าฉันต้องการสินค้าชิ้นไหนบ้าง? และจะได้รู้ยอดชำระ</code></p><ul><li><strong>As a/an</strong> ในประโยคนี้ช่วยให้เราได้คำนามที่น่าจะมีประโยชน์ (อาจจะเอามาเป็นชื่อ Service ภายหลังได้)</li><li><strong>I want to</strong> ในประโยคนี้ทำให้เราได้กริยา (อาจจะเอามาเป็น <strong>Systems Operation</strong> ได้)</li><li><strong>So that</strong> ในประโยคนี้ทำให้เราได้ผลลัพธ์ที่จะเกิด และช่วยให้รู้ว่าเป็น Functional requirements ที่จำเป็นขนาดไหน? หรือถ้าไม่สำคัญเลยอาจจะไม่ใช่ Functional requirements เลยก็ได้</li></ul></blockquote><h4 id=uml-diagram-ทมประโยชน>UML diagram ที่มีประโยชน์</h4><ul><li>Use Case Diagram ช่วยให้เราเห็นภาพรวมจาก User story</li><li>Sequence Diagram ช่วยให้เราเห็นกริยาว่าเกิดอะไรขึ้นบ้างจริงๆ เช่น <code>placeOrder()</code> ต้องมีการ <code>addItem()</code>, <code>calculateTotal()</code>, <code>confirmOrder()</code> เป็นต้น</li></ul><h3 id=ออกแบบ-domain-model>ออกแบบ Domain model</h3><h4 id=uml-diagram-ทมประโยชน-1>UML diagram ที่มีประโยชน์</h4><ul><li>Class Diagram</li></ul><p>ออกแบบ Domain model เหมือนที่หัวข้อก่อนๆ แต่คิดแค่ Entity กับ Value Object ไปก่อน เช่น</p><pre class=mermaid style=visibility:hidden>classDiagram
+    direction LR
+
+    class Customer {
+        +int id
+        +string name
+        +string email
+        +Address address
+        +getHistory() List~Order~
+        +updateProfile(string name, Address addr)
+    }
+
+    class Product {
+        +int id
+        +string name
+        +Money price
+        +int stock
+        +isAvailable(int quantity) bool
+        +reduceStock(int quantity)
+        +updatePrice(Money newPrice)
+    }
+
+    class Order {
+        +int id
+        +int customerId
+        +DateTime orderDate
+        +string status
+        +Money totalAmount
+        +calculateTotal() Money
+        +updateStatus(string newStatus)
+        +cancel()
+    }
+
+    class OrderItem {
+        +int id
+        +int orderId
+        +int productId
+        +int quantity
+        +Money unitPrice
+        +getSubtotal() Money
+    }
+
+    class Address {
+        +string street
+        +string city
+        +string postalCode
+        +getFullAddress() string
+    }
+
+    class Money {
+        +decimal amount
+        +string currency
+        +add(Money other) Money
+        +multiply(int factor) Money
+    }
+
+    %% Relationships
+    Customer "1" --> "*" Order : places
+    Order "1" --> "*" OrderItem : contains
+    Product "1" --> "*" OrderItem : part of
+
+    %% VO Composition
+    Customer *-- Address
+    Product *-- Money
+    Order *-- Money
+    OrderItem *-- Money</pre><h3 id=การนยาม-service-โดยการ-decompose-by-subdomain-pattern>การนิยาม Service โดยการ Decompose by subdomain pattern</h3><p><img alt=https://microservices.io/patterns/decomposition/decompose-by-subdomain.html class=gallery-image data-flex-basis=196px data-flex-grow=81 height=919 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=/blogs/microservice/05-ddd/decompose-by-subdomain.png width=753></p><h4 id=domain-คออะไร>Domain คืออะไร?</h4><p>ก่อนอื่นเราต้องรู้ก่อนว่า Domain model ที่เราได้เรียนรู้ในหัวข้อก่อนๆ นั้นเป็นมุมมอง Solution space ทีนี้ Domain เฉยๆ ที่ยังไม่ได้เอาไปทำโมเดล เป็นมุม Problem space กัน</p><blockquote><p><strong>Domain</strong> คือ ปัญหาทั้งหมดที่ธุรกิจ</p><p><strong>Domain Model</strong> คือ วิธีการแก้ปัญหาทางธุรกิจหรือความรู้ต่างๆ ที่ใช้แก้ปัญหา</p></blockquote><p>แต่ปัญหาคือ <strong>Domain</strong> ปัญหาทั้งหมดที่ธุรกิจ มันยากที่จะแก้ได้ง่าย คิดไม่ออก เราจึงแบ่งปัญหาใหญ่ๆ ออกเป็นปัญหาย่อยๆ ที่แก้ง่ายขึ้น เรียกว่า <strong>Subdomain</strong></p><p><strong>Domain Model</strong> ก็ถูกแบ่งออกเป็น Aggregate ได้เช่นกัน</p><p>ตัวอย่างเช่น</p><pre class=mermaid style=visibility:hidden>graph TD
+    subgraph Domain [E-commerce Domain]
+        
+        S1[Subdomain: <br>Order management]
+        S2[Subdomain: <br>Product management]
+        S3[Subdomain: <br>Inventory management]
+        S4[Subdomain: <br>Delivery management]
+
+        %% ความสัมพันธ์เชิงธุรกิจ
+        S1 -.- S2
+        S1 -.- S3
+        S1 -.- S4
+        S3 -.- S4
+
+    end
+
+    %% Styling
+    style Domain fill:#fdfdfd,stroke:#333,stroke-width:2px
+    style S1 fill:#fff,stroke:#666,stroke-dasharray: 5 5
+    style S2 fill:#fff,stroke:#666,stroke-dasharray: 5 5
+    style S3 fill:#fff,stroke:#666,stroke-dasharray: 5 5
+    style S4 fill:#fff,stroke:#666,stroke-dasharray: 5 5</pre><h4 id=bounded-context-คออะไร>Bounded context คืออะไร?</h4><p>ภาษามนุษย์นี่มันต้องรู้บริบทก่อนถึงจะเข้าใจความหมาย หากไม่รู้บริบทอาจจะไม่รู้ว่าพูดถึงอะไรได้ เช่น Present จะรู้ได้ไงว่าแปลว่าปัจจุบันหรือแปลว่าของขวัญ? มันก็ต้องอาศัยบริบทรอบๆ เพื่อตีความหมายนั้นๆ</p><p>ทีนี้เพื่อให้ทุกคนเข้าใจตรงกันจึงต้องจำกัดบริบทไว้ในกรอบๆ หนึ่งเพื่อไม่ให้ไปตีความเป็นอีกความหมายหนึ่งซึ่งเรียกว่า <strong>Bounded context</strong></p><p>เช่น</p><ul><li><code>Account</code> ในบริบทของ <strong>Banking Service</strong> คือบัญชีเงินฝาก</li><li><code>Account</code> ในบริบทของ <strong>Authentication Service</strong> คือบัญชีที่ใช้ยืนยันตัวตน</li></ul><blockquote><p><strong>Important Note</strong> 📝:</p><p><strong>Bounded context</strong> คือ scope ของ Domain model เพื่อให้แต่ละ Object มีความหมายไม่กำกวม</p><p><strong>Bounded context ใน Microservice มันคือ Service เลยแหละ</strong></p></blockquote><p>ดังนั้นขอสรุปว่าการกำหนด Service ใน Microservice สามารถทำได้โดยการสร้าง <strong>Bounded context</strong> และเราจะแมพ Subdomain ไปหา Service เพื่อบอกว่า Service นี้ใช้แก้ปัญหา Subdomain อะไร</p><p>การแมพ Problem space ไปหา Solution space ที่ต้องทำแบบนี้เพราะช่วยให้รู้ว่า Service แก้ปัญหา Subdomain อันไหนได้บ้าง</p><pre class=mermaid style=visibility:hidden>graph TD
+    %% 1. Problem Space
+    subgraph Space1 [Subdomain]
+        SD[Order Management]
+    end
+
+    %% 2. Solution Space
+    subgraph Space2 [Bounded Context]
+        subgraph OS [Order Service]
+            direction TB
+            subgraph DM [Domain Model]
+                direction TB
+                Model[Entities / Aggregates / Logic]
+            end
+        end
+    end
+
+    %% Mapping Connections
+    SD -- "Maps to" --> OS
+
+    %% Styling
+    style SD fill:#f9f,stroke:#333,stroke-width:2px
+    style OS fill:#bbf,stroke:#333,stroke-width:2px
+    style DM fill:#fff9c4,stroke:#fbc02d,stroke-dasharray: 5 5</pre><ul><li>เท่านี้เราจะได้ Service มาหนึ่งตัวแล้ว<ul><li>ความหมายของการแมพนี้คือ Order Service ใช้แก้ Order Management Subdomain</li></ul></li></ul><blockquote><p><strong>Important Note</strong> 📝:</p><p>เรื่องที่ควรรู้เกี่วกับ Bounded context</p><ul><li>เราอาจจะแมพหลายๆ Subdomain ไปหา 1 Bounded context ได้ ไม่จำเป็นว่า 1 Subdomain ต่อ 1 Bounded context</li><li>การคิด Service (Bounded context) ก็คิดมาแค่ให้มันแก้ได้อย่างน้อยหนึ่ง Subdomain และเลือกชื่อที่มันเหมาะสม</li><li>แม้นว่าหลายๆ Subdomain ไปหา 1 Bounded context แต่ถ้าเราเอา Subdomain ที่อยู่คนละหน้าที่กันเลยแบบคนละโลกเลย จะได้ Fat Service มาแทน ทำให้ maintenance ยากเพราะโค้ดใหญ่<ul><li>โดยทั่วไปควร 1 Subdomain : 1 Bounded context</li></ul></li></ul></blockquote><p>เช่น</p><pre class=mermaid style=visibility:hidden>graph TD
+    %% 1. Problem Space
+    subgraph Subdomains [Domain]
+        SD1["Order subdomain"]
+        SD2["Promotion subdomain"]
+        SD3["..."]
+    end
+
+    %% 2. Implementation
+    subgraph Services [Implementation]
+        S1[["Order Service"]]
+        S2[["..."]]
+    end
+
+    %% Mapping connections
+    SD1 --> S1
+    SD2 --> S1
+    SD3 --> S2
+
+    %% Styling
+    style S1 fill:#dfd,stroke:#2d2,stroke-width:2px
+    style S2 fill:#dfd,stroke:#2d2,stroke-width:2px
+    style SD1 fill:#f9f,stroke:#333
+    style SD2 fill:#f9f,stroke:#333</pre><h4 id=ubiquitous-language>Ubiquitous Language</h4><p>คือ <strong>&ldquo;ภาษากลาง&rdquo;</strong> ที่ทุกคนในทีมใช้แบบเดียวกันทั้งทีมธุรกิจและทีมนักพัฒนา</p><h4 id=คำแนะนำ>คำแนะนำ</h4><ol><li><strong>Single Responsibility Principle - SRP</strong></li></ol><p>ควรออกแบบ Service ให้มีหน้าที่รับผิดชอบเดียว (High Cohesive) และมีขนาดเล็กพอเหมาะ เพราะทำให้ Maintenance ได้ง่ายกว่า (ทางที่ดี 1 Service ต่อ 1 Subdomain)</p><ol start=2><li><strong>Common Closure Principle - CCP</strong></li></ol><p>หากมีกลุ่ม Services ไหนต้องมีการเปลี่ยงแปลงตามธุรกิจที่เปลี่ยนไปตามกาลเวลา พร้อมกันและเหตุผลในการเปลี่ยนเดียวกัน ควรจับมาอยู่ใน Service เดียวกัน</p></section><footer class="article-meta article-footer"><section class=article-tags><a href=/tags/microservice/>Microservice</a>
+<a href=/tags/backend/>Backend</a></section><section class="article-copyright inline-meta"><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under <a class=link href=https://creativecommons.org/licenses/by-nc-sa/4.0/ target=_blank rel=noopener>CC BY-NC-SA 4.0</a></span></section></footer></article><aside><h2 class=section-title>Related content</h2><div class=subsection-list><div class=article-list--tile><article><a href=/blogs/microservice/06-event-sourcing/><div class=article-details><h2 class=article-title>Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</h2></div></a></article><article><a href=/blogs/microservice/04-query/><div class=article-details><h2 class=article-title>Microservice ตอนที่ 4 Queries in Microservice</h2></div></a></article><article><a href=/blogs/microservice/03-saga/><div class=article-details><h2 class=article-title>Microservice ตอนที่ 3 saga pattern</h2></div></a></article><article><a href=/blogs/microservice/02-ipc/><div class=article-details><h2 class=article-title>Microservice ตอนที่ 2 Inter process communication (IPC)</h2></div></a></article><article><a href=/blogs/microservice/01-introduction/><div class=article-details><h2 class=article-title>Microservice ตอนที่ 1 Monolith vs Microservice</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2026 Nextjingjing</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script><div class=mermaid-modal id=mermaid-modal><div class=mermaid-modal-header><div class=mermaid-modal-controls><button data-zoom=-1>− Zoom Out</button>
+<button data-zoom=0>Reset (100%)</button>
+<button data-zoom=1>+ Zoom In</button>
+<button data-zoom=fit>Fit to Screen</button></div><button class=mermaid-modal-close id=mermaid-modal-close>✕ Close (Esc)</button></div><div class=mermaid-modal-body id=mermaid-modal-body><div class=mermaid-modal-content id=mermaid-modal-content></div></div></div><script src=https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js></script><script type=module>
+import { initMermaidPage } from '\/ts\/mermaid.js';
+initMermaidPage({"darkTheme":"dark","darkThemeVariables":{},"htmlLabels":true,"lightTheme":"default","lightThemeVariables":{},"look":"classic","securityLevel":"strict","transparentBackground":false});
+</script></main></div><script type=text/javascript src=/ts/main.acaf849f2b273f6a8368a58b001f336738d0c948d92e79b116467d0c7515f932.js defer></script></body></html>
