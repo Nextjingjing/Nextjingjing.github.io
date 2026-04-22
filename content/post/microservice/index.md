@@ -29,4 +29,6 @@ Microservice คือสถาปัตยกรรมที่แบ่งร�
 
 [บทที่ 5: การออกแบบ Business logic และ Service ด้วย Domain Driven Design ](../../blogs/microservice/05-ddd/)
 
+[บทที่ 6: Event sourcing ](../../blogs/microservice/06-event-sourcing/)
+
 {{< page-nav prev-link="/../" next-link="../../blogs/microservice/01-introduction/">}}

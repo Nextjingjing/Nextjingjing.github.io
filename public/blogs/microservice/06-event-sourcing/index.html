@@ -16,7 +16,7 @@
 <meta property='og:description' content="Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing">
 <meta property='og:url' content='http://localhost:1313/blogs/microservice/06-event-sourcing/'>
 <meta property='og:site_name' content='Nextjingjing'>
-<meta property='og:type' content='article'><meta property='article:section' content='Blogs' /><meta property='article:tag' content='Microservice' /><meta property='article:tag' content='Backend' /><meta property='article:published_time' content='2026-04-18T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-04-18T00:00:00&#43;00:00'/>
+<meta property='og:type' content='article'><meta property='article:section' content='Blogs' /><meta property='article:tag' content='Microservice' /><meta property='article:tag' content='Backend' /><meta property='article:published_time' content='2026-04-22T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-04-22T00:00:00&#43;00:00'/>
 <meta name="twitter:title" content="Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing">
 <meta name="twitter:description" content="Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing">
     <link rel="shortcut icon" href="/img/profile.png" />
@@ -270,8 +270,26 @@
     <li><a href="#event-sourcing-1">Event sourcing</a>
       <ol>
         <li><a href="#ลกษณะ">ลักษณะ</a></li>
+        <li><a href="#ขอด">ข้อดี</a></li>
+        <li><a href="#ขอเสย">ข้อเสีย</a></li>
+        <li><a href="#ปญหา">ปัญหา</a>
+          <ol>
+            <li><a href="#concurrent-updates-การมการการอพเดตพรอมๆ-กนใน-1-record">concurrent updates การมีการการอัพเดตพร้อมๆ กันใน 1 Record</a></li>
+            <li><a href="#การ-publish-events-มการขาม-events-หากใช-polling-publisher">การ Publish events มีการข้าม Events (หากใช้ Polling Publisher)</a></li>
+            <li><a href="#ตองระวงขอความซำ-duplicated-message-จาก-service-อนๆ">ต้องระวังข้อความซ้ำ Duplicated message จาก Service อื่นๆ</a></li>
+            <li><a href="#query-ชาหาก-events-เรมเยอะ">Query ช้าหาก Events เริ่มเยอะ</a></li>
+          </ol>
+        </li>
+        <li><a href="#การทำ-snapshot-เพอประสทธภาพ">การทำ Snapshot เพื่อประสิทธิภาพ</a></li>
       </ol>
     </li>
+    <li><a href="#การทำ-event-store">การทำ Event store</a>
+      <ol>
+        <li><a href="#ทำดวยตวเอง">ทำด้วยตัวเอง</a></li>
+        <li><a href="#event-store-สำเรจรป">Event store สำเร็จรูป</a></li>
+      </ol>
+    </li>
+    <li><a href="#ความเขากนกบ-cqrs">ความเข้ากันกับ CQRS</a></li>
   </ol>
 
             </nav>
@@ -333,7 +351,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                    <time class="article-time--published" datetime='2026-04-18T00:00:00Z'>Saturday, April 18, 2026</time>
+                    <time class="article-time--published" datetime='2026-04-22T00:00:00Z'>Wednesday, April 22, 2026</time>
                 
 
                 
@@ -346,7 +364,7 @@
 
 
                     <time class="article-time--reading">
-                        1 minute read
+                        4 minutes read
                     </time>
                 
             </div>
@@ -377,8 +395,26 @@
     <li><a href="#event-sourcing-1">Event sourcing</a>
       <ol>
         <li><a href="#ลกษณะ">ลักษณะ</a></li>
+        <li><a href="#ขอด">ข้อดี</a></li>
+        <li><a href="#ขอเสย">ข้อเสีย</a></li>
+        <li><a href="#ปญหา">ปัญหา</a>
+          <ol>
+            <li><a href="#concurrent-updates-การมการการอพเดตพรอมๆ-กนใน-1-record">concurrent updates การมีการการอัพเดตพร้อมๆ กันใน 1 Record</a></li>
+            <li><a href="#การ-publish-events-มการขาม-events-หากใช-polling-publisher">การ Publish events มีการข้าม Events (หากใช้ Polling Publisher)</a></li>
+            <li><a href="#ตองระวงขอความซำ-duplicated-message-จาก-service-อนๆ">ต้องระวังข้อความซ้ำ Duplicated message จาก Service อื่นๆ</a></li>
+            <li><a href="#query-ชาหาก-events-เรมเยอะ">Query ช้าหาก Events เริ่มเยอะ</a></li>
+          </ol>
+        </li>
+        <li><a href="#การทำ-snapshot-เพอประสทธภาพ">การทำ Snapshot เพื่อประสิทธิภาพ</a></li>
       </ol>
     </li>
+    <li><a href="#การทำ-event-store">การทำ Event store</a>
+      <ol>
+        <li><a href="#ทำดวยตวเอง">ทำด้วยตัวเอง</a></li>
+        <li><a href="#event-store-สำเรจรป">Event store สำเร็จรูป</a></li>
+      </ol>
+    </li>
+    <li><a href="#ความเขากนกบ-cqrs">ความเข้ากันกับ CQRS</a></li>
   </ol>
 
             </nav>
@@ -475,7 +511,296 @@
 </h2><h3 id="ลกษณะ">ลักษณะ
 </h3><ul>
 <li>Event-oriented Persistence เก็บทุกสถานะแล้วนำมารวมเป็นข้อมูล</li>
-<li></li>
+<li>การ Query ข้อมูล Entity เดียวจะทำโดยการนำ Event ที่มี entity_id เดียวกันทั้งหมดมารวมกันเป็นข้อมูลปัจจุบัน (Replaying Events) โดยอาาจะใช้ Loop
+<ul>
+<li>ถ้านานวันเข้า Events ของ entity_id มีเป็น 1000ๆ Record จะช้า (แก้ได้ปัญหานี้)</li>
+</ul>
+</li>
+<li>การ Query ข้อมูลหลายๆ Entity ซวยละ ช้ามากๆ เพราะการรวม Events ทั้งหมดไม่ใช่เรื่องง่ายๆ
+<ul>
+<li>CQRS ช่วยได้เยอะ</li>
+</ul>
+</li>
+<li>การ Update ข้อมูลทำโดยการเพิ่ม Events ใหม่ๆ เข้าไป</li>
+</ul>
+<p>ตัวอย่างการ Query 1 Entity</p>
+<pre class="mermaid" style="visibility:hidden">sequenceDiagram
+    participant Client
+    participant API as API / Service
+    participant Store as Event Store (Database)
+    participant Model as Replaying Events
+
+    Client->>API: Request Data (e.g., entity_id: 101)
+    
+    Note over API, Store: ค้นหา Event ทั้งหมดของ ID นี้
+    API->>Store: SELECT * FROM events WHERE entity_id = 101 ORDER BY version ASC
+    Store-->>API: List of Events (Created, Updated, Verified, etc.)
+    
+    Note over API, Model: นำ Events มาพับรวมกัน (Fold/Reduce)
+    API->>Model: Apply Events to Initial State
+    loop Each Event
+        Model->>Model: State + Event = New State
+    end
+    
+    Model-->>API: Final Current State
+    API-->>Client: Response (JSON / Object)</pre><h3 id="ขอด">ข้อดี
+</h3><ul>
+<li>Audit Trail ตรวจสอบประวัติเก่งมาก</li>
+<li>นำไปใช้กับ CQRS (บทที่ 4) ได้ดี</li>
+</ul>
+<h3 id="ขอเสย">ข้อเสีย
+</h3><ul>
+<li>Learning Curve สูง</li>
+<li>Query แย่ (อาจจะต้องเสียเวลาทำ CQRS)</li>
+<li>มีปัญหาจุกจิกเยอะกว่าการเก็บแค่ State ปัจจุบัน (State-oriented Persistence)</li>
+</ul>
+<h3 id="ปญหา">ปัญหา
+</h3><h4 id="concurrent-updates-การมการการอพเดตพรอมๆ-กนใน-1-record">concurrent updates การมีการการอัพเดตพร้อมๆ กันใน 1 Record
+</h4><p>Transaction ไม่ทำงานเหมือนในตอนที่เราทำแบบ State-oriented Persistence ที่เก็บแค่สถานะปัจจุบันเท่านั้นเพราะมันสร้าง Record ใหม่ตลอดนั้นเองแทนการอัพเดต ดังนั้นหากเกิดการอัพเดตพร้อมกันจึงต้องใช้ <strong>optimistic locking</strong> โดยใช้เวอร์ชั่นป้องกันการเขียนพร้อมกัน</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">AGGREGATE_ROOT_TABLE</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">VERSION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">VERSION</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="k">WHERE</span><span class="w"> </span><span class="k">VERSION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;</span><span class="n">original</span><span class="w"> </span><span class="k">version</span><span class="o">&gt;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>มีการเช็ค <code>WHERE VERSION = &lt;original version&gt;</code> เพื่อดูว่ามีคนอื่นตัดหน้าไหม</p>
+<ul>
+<li>ถ้า Version ตรง แสดงว่าสามารถอัพเดตได้</li>
+<li>ถ้า Version ไม่ตรง แสดงว่ามีคนอื่นอัพเดต ข้อมูลในมือล้าสมัย <strong>ห้ามเขียนทับเด็ดขาด</strong></li>
+</ul>
+<p>ขอยกตัวอย่างเพื่อความง่าย</p>
+<ul>
+<li>มีที่นั่ง A1 กำลังว่าง และ Original version เป็น 2</li>
+<li>มี Request X, Y กำลังขอจอง A1 พร้อมๆ กัน เพราะเห็นว่า A1 ว่างอยู่
+ขอให้ X เป็นคนที่จอง A1 ได้จริงแล้วกัน</li>
+<li>X เห็นว่า A1 ว่างอยู่ X จะจองเลยบันทึก Event ว่าจอง A1 และเปลี่ยน version เป็น 3</li>
+<li>Y เห็นว่า A1 ว่างอยู่ Y จะจองแต่พอเห็น <code>WHERE VERSION = &lt;original version&gt;</code> ไม่ใช่ 2 แต่เป็น 3 จะหยุดอัพเดตทันที
+<ul>
+<li>ถ้าไม่หยุดระบบจะเห็นว่ามีคนจอง 2 คนเลย</li>
+</ul>
+</li>
+</ul>
+<h4 id="การ-publish-events-มการขาม-events-หากใช-polling-publisher">การ Publish events มีการข้าม Events (หากใช้ Polling Publisher)
+</h4><p>วิธีแบบง่ายๆ คือ Polling การส่ง event ทุกๆ x วินาที
+อาจจะมีการข้าม events ได้หากว่ามีการได้หากคุณจะ Publish แบบมีการติดตาม Events ล่าสุดที่ถูก Publish ไปแล้วโดยเช็คตัวที่</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">EVENTS</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="k">where</span><span class="w"> </span><span class="n">event_id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">?</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">event_id</span><span class="w"> </span><span class="k">ASC</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>ปัญหาคือ หาก <code>event_id</code> = 11 ถูก commit ก่อน <code>event_id</code> = 10 แบบนี้แหละจะซวยเพราะระบบจะข้าม <code>event_id</code> = 10 ไปเพราะคุณตามแค่หลังจาก Events ล่าสุดเท่านั้น</p>
+<h5 id="ทางแกแบบงาย">ทางแก้แบบง่าย
+</h5><p>Polling การส่ง event ทุกๆ x วินาที แต่สร้าง Column พิเศษมาเช็ค PUBLISHED หาก = 0 ยังไม่ได้ส่ง หาก = 1 ส่งแล้ว</p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>event_id</th>
+          <th>&hellip;</th>
+          <th>PUBLISHED</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>10</td>
+          <td>&hellip;</td>
+          <td>0</td>
+      </tr>
+      <tr>
+          <td>11</td>
+          <td>&hellip;</td>
+          <td>1</td>
+      </tr>
+  </tbody>
+</table></div>
+<p>และ Query ให้หาตัวที่ PUBLISHED = 0</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="n">EVENTS</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">PUBLISHED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">event_id</span><span class="w"> </span><span class="k">ASC</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>เมื่อ Publish Event ที่ <code>PUBLISHED = 0</code> ให้เปลี่ยนเป็น <code>PUBLISHED = 1</code></p>
+<h5 id="ทางแกอกแบบ-ใช-transaction-log-tailing-แทน">ทางแก้อีกแบบ ใช้ Transaction log tailing แทน
+</h5><p><strong>เลิก Polling การส่ง event ทุกๆ x วินาที</strong></p>
+<p>และหันมาใช้ <strong>Transaction log tailing แทน</strong>เแบบในบทที่ 2 เอา Relay ไปอ่าน log ของ Database (ดักจับ log) และเป็นทางเลือกที่ดีกว่าด้วย</p>
+<p><strong>ข้อดี</strong></p>
+<ul>
+<li>ดีกว่าแบบ Polling Publisher ตรงที่ประสิทธิภาพดีกว่า Polling Publisher เพราะไม่เป็นภาระให้ Database ทำงาน Query events มาให้</li>
+</ul>
+<h4 id="ตองระวงขอความซำ-duplicated-message-จาก-service-อนๆ">ต้องระวังข้อความซ้ำ Duplicated message จาก Service อื่นๆ
+</h4><p>หาก Service ของเรามีการรับ Message ของ service อื่นต้องระวังข้อความซ้ำ เพราะจะทำให้การสร้าง Event ของเราซ้ำได้เช่นกัน ทางแก้ก็แก้แบบบทที่ 2 คือทำตาราง <code>PROCESSED_MESSAGES table</code> และใช้ Transaction บันทึก Event ลง <code>EVENTS table</code> และบันทึก Message ที่เข้ามาลง <code>PROCESSED_MESSAGES table</code></p>
+<h4 id="query-ชาหาก-events-เรมเยอะ">Query ช้าหาก Events เริ่มเยอะ
+</h4><p>ลองคิดว่าเราจะ Query หา <code>entity_id</code> = 10 เริ่มมีเป็นสิบๆ ร้อยๆ Records ดูสิ แบบนี้ทำไง ทางแก้คือการทำ Snapshot เพื่อทำให้ Query ช้า</p>
+<p>ขออธิบาย Snapshot ในหัวข้อถัดไปเพราะสำคัญอยู่</p>
+<h3 id="การทำ-snapshot-เพอประสทธภาพ">การทำ Snapshot เพื่อประสิทธิภาพ
+</h3><p>คงเป็นเรื่องที่ช้าหากเราจะ Replay เป็นร้อยๆ พันๆ Record หากเราทำ Snapshot จะช่วยให้ปริมาณ event ที่ต้อง Replay ลดลงไปได้</p>
+<p>การทำ Snapshot</p>
+<pre class="mermaid" style="visibility:hidden">graph LR
+    subgraph Past_Events [Events in the past]
+        E1((Event 1)) --- E2((Event 2))
+        E2 --- ED[...]
+        ED --- EN((Event N))
+    end
+
+    EN --> Snapshot[/"Snapshot version: N"/]
+
+    subgraph Reconstruction [Current State Reconstruction]
+        direction LR
+        Snapshot --> EN1((Event N+1))
+        EN1 --> EN2((Event N+2))
+    end
+
+    EN2 --> Final((Current State))
+
+    style Snapshot fill:#fff,stroke:#333,stroke-width:2px
+    style Past_Events fill:#f9f9f9,stroke:#ccc,stroke-dasharray: 5 5
+    style Reconstruction fill:#fff,stroke:#333,stroke-dasharray: 5 5</pre><p>หากคุณทำ Snapshot ที่ N คุณก็แค่ Replay N+1, N+2, &hellip; โดยที่ไม่ต้องไป Replay 1, 2, 3, 4, &hellip;, N-1 ใหม่</p>
+<p>โดยการทำ Snapshot คุณสามารถทำโดยการสร้าง <code>SNAPSHOTS Table</code> ขึ้นมา</p>
+<p><code>EVENTS Table</code></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>event_id</th>
+          <th>entity_id</th>
+          <th>entity_type</th>
+          <th>event_type</th>
+          <th>event_data</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>&hellip;</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>7</td>
+          <td>3</td>
+          <td>Customer</td>
+          <td>CreditReserved</td>
+          <td>{&hellip;}</td>
+      </tr>
+      <tr>
+          <td>8</td>
+          <td>3</td>
+          <td>Customer</td>
+          <td>AddressChange</td>
+          <td>{&hellip;}</td>
+      </tr>
+      <tr>
+          <td>9</td>
+          <td>3</td>
+          <td>Customer</td>
+          <td>NameChange</td>
+          <td>{&hellip;}</td>
+      </tr>
+      <tr>
+          <td>10</td>
+          <td>3</td>
+          <td>Customer</td>
+          <td>&hellip;</td>
+          <td>{&hellip;}</td>
+      </tr>
+      <tr>
+          <td>11</td>
+          <td>3</td>
+          <td>Customer</td>
+          <td>&hellip;</td>
+          <td>{&hellip;}</td>
+      </tr>
+      <tr>
+          <td>12</td>
+          <td>3</td>
+          <td>Customer</td>
+          <td>&hellip;</td>
+          <td>{&hellip;}</td>
+      </tr>
+      <tr>
+          <td>&hellip;</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+  </tbody>
+</table></div>
+<p><code>SNAPSHOTS Table</code></p>
+<div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>event_id</th>
+          <th>entity_id</th>
+          <th>entity_type</th>
+          <th>snapshot_data</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>&hellip;</td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>10</td>
+          <td>3</td>
+          <td>Customer</td>
+          <td>{&ldquo;name&rdquo;: &hellip;}</td>
+      </tr>
+      <tr>
+          <td>&hellip;</td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+  </tbody>
+</table></div>
+<p>เท่านี้เวลาคุณ Replay event ก็มาที่ Snapshot จะเห็นว่า N = 10 ดังนั้นคุณก็แค่ Replay 11, 12</p>
+<h2 id="การทำ-event-store">การทำ Event store
+</h2><p>ทำได้ 2 วิธี</p>
+<h3 id="ทำดวยตวเอง">ทำด้วยตัวเอง
+</h3><ul>
+<li>ทำ <code>EVENTS TABLE</code> เอง</li>
+<li>ทำ Snapshot เอง</li>
+<li>รับมือ Concurrency เอง โดยการทำ Optimistic locking</li>
+<li>ต้องทำกลไกลอ่าน, เขียน Events เอง Replay เอง</li>
+<li>ต้องทำ Publish event เอง</li>
+</ul>
+<p>เหนื่อยครับ!</p>
+<h3 id="event-store-สำเรจรป">Event store สำเร็จรูป
+</h3><ul>
+<li>EventStoreDB</li>
+<li>Axon Server (สาย Java / Spring Boot)</li>
+<li>Marten (สาย .NET + PostgreSQL)</li>
+<li>&hellip;</li>
+</ul>
+<p>เป็นต้น</p>
+<p>บางอันก็ฟรีบางอันก็เสียเงินแต่ข้อดีคือคุณไม่ต้องเสียเวลาในการทำ Event Sourcing เอง</p>
+<h2 id="ความเขากนกบ-cqrs">ความเข้ากันกับ CQRS
+</h2><ul>
+<li>Event Sourcing ทำให้ Query ยาก เลยต้องนำ CQRS มาช่วย</li>
+<li>Event store ตอบโจทย์ CQRS เนื่องจากการ Replay Event เป็นอีกหนึ่งบทบาทที่ทำให้ CQRS ยืดหยุ่นมาก เพราะทำให้ Scaling จำนวนเครื่อง Read, เปลี่ยน Database, ป้องกันความผิดพลาด</li>
 </ul>
 
 </section>
@@ -627,7 +952,25 @@
         lightbox.init();
     }
 </script>
-    
+    <div class="mermaid-modal" id="mermaid-modal">
+    <div class="mermaid-modal-header">
+        <div class="mermaid-modal-controls">
+            <button data-zoom="-1">− Zoom Out</button>
+            <button data-zoom="0">Reset (100%)</button>
+            <button data-zoom="1">+ Zoom In</button>
+            <button data-zoom="fit">Fit to Screen</button>
+        </div>
+        <button class="mermaid-modal-close" id="mermaid-modal-close">✕ Close (Esc)</button>
+    </div>
+    <div class="mermaid-modal-body" id="mermaid-modal-body">
+        <div class="mermaid-modal-content" id="mermaid-modal-content"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script type="module">
+import { initMermaidPage } from '\/ts\/mermaid.js';
+initMermaidPage({"darkTheme":"dark","darkThemeVariables":{},"htmlLabels":true,"lightTheme":"default","lightThemeVariables":{},"look":"classic","securityLevel":"strict","transparentBackground":false});
+</script>
 
             </main>
         </div>
