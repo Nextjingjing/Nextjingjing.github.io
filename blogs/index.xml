@@ -1,4 +1,380 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Nextjingjing</title><link>https://Nextjingjing.github.io/blogs/</link><description>Recent content in Blogs on Nextjingjing</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 18 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Nextjingjing.github.io/blogs/index.xml" rel="self" type="application/rss+xml"/><item><title>Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</title><link>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</link><pubDate>Sat, 18 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</guid><description>&lt;h1 id="domain-driven-design"&gt;Domain Driven Design
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Blogs on Nextjingjing</title><link>https://Nextjingjing.github.io/blogs/</link><description>Recent content in Blogs on Nextjingjing</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 22 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Nextjingjing.github.io/blogs/index.xml" rel="self" type="application/rss+xml"/><item><title>Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</title><link>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</link><pubDate>Wed, 22 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</guid><description>&lt;h1 id="event-sourcing"&gt;Event sourcing
+&lt;/h1&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;โดยปกติแล้วการบันทึกข้อมูลลงฐานข้อมูลนั้นเราจะบันทึกแค่ค่าปัจจุบันของ Record นั้นๆ แต่ปัญหาที่ตามมาคือเราจะไม่เห็นประวัติเก่าของ Record นั้นๆ ดังนั้น Event sourcing จึงมาแก้ปัญหาดังกล่าว&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h2 id="ประเภทของการเกบขอมล"&gt;ประเภทของการเก็บข้อมูล
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;State-oriented Persistence (การเก็บสถานะปัจจุบัน) เป็นแบบที่เราคุ้นเคยเลยเก็ยสถานะปัจจุบันของข้อมูล แต่ประวัติหายหมด&lt;/li&gt;
+&lt;/ol&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th style="text-align: left"&gt;account_id&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;customer_name&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;balance&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;last_updated&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;status&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;Somchai Dee&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;850.00&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 10:30:00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;Active&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;ACC-002&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;Somsak Range&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;1,200.00&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-19 14:15:00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;Active&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;Event Sourcing (Event-oriented Persistence) เป็นแบบที่เน้นเก็บทุกสถานะของข้อมูลลงในฐานข้อมูล แล้วค่อยนำกลับมารวมกันคำนวณเป็นสถานะปัจจุบันแทน ซึ่งข้อดีคือประวัติยังอยู่&lt;/li&gt;
+&lt;/ol&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th style="text-align: left"&gt;event_id&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;account_id&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;event_type&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;amount&lt;/th&gt;
+ &lt;th style="text-align: left"&gt;timestamp&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;1&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;AccountOpened&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;0.00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 09:00:00&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;2&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyDeposited&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;1000.00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 09:15:00&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;3&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyWithdrawn&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;150.00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 10:30:00&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td style="text-align: left"&gt;4&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyWithdrawn&lt;/strong&gt;&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;200.00&lt;/td&gt;
+ &lt;td style="text-align: left"&gt;2024-05-20 11:00:00&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;ซึ่งสถานะปัจจุบันของ &lt;code&gt;ACC-001&lt;/code&gt; คือ 0.00 + 1000.00 - 150.00 - 200.00 = &lt;strong&gt;650.00&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id="event-sourcing-1"&gt;Event sourcing
+&lt;/h2&gt;&lt;h3 id="ลกษณะ"&gt;ลักษณะ
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Event-oriented Persistence เก็บทุกสถานะแล้วนำมารวมเป็นข้อมูล&lt;/li&gt;
+&lt;li&gt;การ Query ข้อมูล Entity เดียวจะทำโดยการนำ Event ที่มี entity_id เดียวกันทั้งหมดมารวมกันเป็นข้อมูลปัจจุบัน (Replaying Events) โดยอาาจะใช้ Loop
+&lt;ul&gt;
+&lt;li&gt;ถ้านานวันเข้า Events ของ entity_id มีเป็น 1000ๆ Record จะช้า (แก้ได้ปัญหานี้)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;การ Query ข้อมูลหลายๆ Entity ซวยละ ช้ามากๆ เพราะการรวม Events ทั้งหมดไม่ใช่เรื่องง่ายๆ
+&lt;ul&gt;
+&lt;li&gt;CQRS ช่วยได้เยอะ&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;การ Update ข้อมูลทำโดยการเพิ่ม Events ใหม่ๆ เข้าไป&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ตัวอย่างการ Query 1 Entity&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;sequenceDiagram
+ participant Client
+ participant API as API / Service
+ participant Store as Event Store (Database)
+ participant Model as Replaying Events
+
+ Client-&gt;&gt;API: Request Data (e.g., entity_id: 101)
+ 
+ Note over API, Store: ค้นหา Event ทั้งหมดของ ID นี้
+ API-&gt;&gt;Store: SELECT * FROM events WHERE entity_id = 101 ORDER BY version ASC
+ Store--&gt;&gt;API: List of Events (Created, Updated, Verified, etc.)
+ 
+ Note over API, Model: นำ Events มาพับรวมกัน (Fold/Reduce)
+ API-&gt;&gt;Model: Apply Events to Initial State
+ loop Each Event
+ Model-&gt;&gt;Model: State + Event = New State
+ end
+ 
+ Model--&gt;&gt;API: Final Current State
+ API--&gt;&gt;Client: Response (JSON / Object)&lt;/pre&gt;&lt;h3 id="ขอด"&gt;ข้อดี
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Audit Trail ตรวจสอบประวัติเก่งมาก&lt;/li&gt;
+&lt;li&gt;นำไปใช้กับ CQRS (บทที่ 4) ได้ดี&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ขอเสย"&gt;ข้อเสีย
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Learning Curve สูง&lt;/li&gt;
+&lt;li&gt;Query แย่ (อาจจะต้องเสียเวลาทำ CQRS)&lt;/li&gt;
+&lt;li&gt;มีปัญหาจุกจิกเยอะกว่าการเก็บแค่ State ปัจจุบัน (State-oriented Persistence)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ปญหา"&gt;ปัญหา
+&lt;/h3&gt;&lt;h4 id="concurrent-updates-การมการการอพเดตพรอมๆ-กนใน-1-record"&gt;concurrent updates การมีการการอัพเดตพร้อมๆ กันใน 1 Record
+&lt;/h4&gt;&lt;p&gt;Transaction ไม่ทำงานเหมือนในตอนที่เราทำแบบ State-oriented Persistence ที่เก็บแค่สถานะปัจจุบันเท่านั้นเพราะมันสร้าง Record ใหม่ตลอดนั้นเองแทนการอัพเดต ดังนั้นหากเกิดการอัพเดตพร้อมกันจึงต้องใช้ &lt;strong&gt;optimistic locking&lt;/strong&gt; โดยใช้เวอร์ชั่นป้องกันการเขียนพร้อมกัน&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sql" data-lang="sql"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;UPDATE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;AGGREGATE_ROOT_TABLE&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;SET&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;VERSION&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;VERSION&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;WHERE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;VERSION&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;original&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;version&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;มีการเช็ค &lt;code&gt;WHERE VERSION = &amp;lt;original version&amp;gt;&lt;/code&gt; เพื่อดูว่ามีคนอื่นตัดหน้าไหม&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ถ้า Version ตรง แสดงว่าสามารถอัพเดตได้&lt;/li&gt;
+&lt;li&gt;ถ้า Version ไม่ตรง แสดงว่ามีคนอื่นอัพเดต ข้อมูลในมือล้าสมัย &lt;strong&gt;ห้ามเขียนทับเด็ดขาด&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ขอยกตัวอย่างเพื่อความง่าย&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;มีที่นั่ง A1 กำลังว่าง และ Original version เป็น 2&lt;/li&gt;
+&lt;li&gt;มี Request X, Y กำลังขอจอง A1 พร้อมๆ กัน เพราะเห็นว่า A1 ว่างอยู่
+ขอให้ X เป็นคนที่จอง A1 ได้จริงแล้วกัน&lt;/li&gt;
+&lt;li&gt;X เห็นว่า A1 ว่างอยู่ X จะจองเลยบันทึก Event ว่าจอง A1 และเปลี่ยน version เป็น 3&lt;/li&gt;
+&lt;li&gt;Y เห็นว่า A1 ว่างอยู่ Y จะจองแต่พอเห็น &lt;code&gt;WHERE VERSION = &amp;lt;original version&amp;gt;&lt;/code&gt; ไม่ใช่ 2 แต่เป็น 3 จะหยุดอัพเดตทันที
+&lt;ul&gt;
+&lt;li&gt;ถ้าไม่หยุดระบบจะเห็นว่ามีคนจอง 2 คนเลย&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="การ-publish-events-มการขาม-events-หากใช-polling-publisher"&gt;การ Publish events มีการข้าม Events (หากใช้ Polling Publisher)
+&lt;/h4&gt;&lt;p&gt;วิธีแบบง่ายๆ คือ Polling การส่ง event ทุกๆ x วินาที
+อาจจะมีการข้าม events ได้หากว่ามีการได้หากคุณจะ Publish แบบมีการติดตาม Events ล่าสุดที่ถูก Publish ไปแล้วโดยเช็คตัวที่&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sql" data-lang="sql"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;FROM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;EVENTS&lt;/span&gt;&lt;span class="w"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;where&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;event_id&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="w"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;ORDER&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;BY&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;event_id&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;ASC&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;ปัญหาคือ หาก &lt;code&gt;event_id&lt;/code&gt; = 11 ถูก commit ก่อน &lt;code&gt;event_id&lt;/code&gt; = 10 แบบนี้แหละจะซวยเพราะระบบจะข้าม &lt;code&gt;event_id&lt;/code&gt; = 10 ไปเพราะคุณตามแค่หลังจาก Events ล่าสุดเท่านั้น&lt;/p&gt;
+&lt;h5 id="ทางแกแบบงาย"&gt;ทางแก้แบบง่าย
+&lt;/h5&gt;&lt;p&gt;Polling การส่ง event ทุกๆ x วินาที แต่สร้าง Column พิเศษมาเช็ค PUBLISHED หาก = 0 ยังไม่ได้ส่ง หาก = 1 ส่งแล้ว&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;event_id&lt;/th&gt;
+ &lt;th&gt;&amp;hellip;&lt;/th&gt;
+ &lt;th&gt;PUBLISHED&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;10&lt;/td&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;0&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;11&lt;/td&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;1&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;และ Query ให้หาตัวที่ PUBLISHED = 0&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sql" data-lang="sql"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;SELECT&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;FROM&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;EVENTS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;where&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;PUBLISHED&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;ORDER&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;BY&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;event_id&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;ASC&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;เมื่อ Publish Event ที่ &lt;code&gt;PUBLISHED = 0&lt;/code&gt; ให้เปลี่ยนเป็น &lt;code&gt;PUBLISHED = 1&lt;/code&gt;&lt;/p&gt;
+&lt;h5 id="ทางแกอกแบบ-ใช-transaction-log-tailing-แทน"&gt;ทางแก้อีกแบบ ใช้ Transaction log tailing แทน
+&lt;/h5&gt;&lt;p&gt;&lt;strong&gt;เลิก Polling การส่ง event ทุกๆ x วินาที&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;และหันมาใช้ &lt;strong&gt;Transaction log tailing แทน&lt;/strong&gt;เแบบในบทที่ 2 เอา Relay ไปอ่าน log ของ Database (ดักจับ log) และเป็นทางเลือกที่ดีกว่าด้วย&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ข้อดี&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ดีกว่าแบบ Polling Publisher ตรงที่ประสิทธิภาพดีกว่า Polling Publisher เพราะไม่เป็นภาระให้ Database ทำงาน Query events มาให้&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="ตองระวงขอความซำ-duplicated-message-จาก-service-อนๆ"&gt;ต้องระวังข้อความซ้ำ Duplicated message จาก Service อื่นๆ
+&lt;/h4&gt;&lt;p&gt;หาก Service ของเรามีการรับ Message ของ service อื่นต้องระวังข้อความซ้ำ เพราะจะทำให้การสร้าง Event ของเราซ้ำได้เช่นกัน ทางแก้ก็แก้แบบบทที่ 2 คือทำตาราง &lt;code&gt;PROCESSED_MESSAGES table&lt;/code&gt; และใช้ Transaction บันทึก Event ลง &lt;code&gt;EVENTS table&lt;/code&gt; และบันทึก Message ที่เข้ามาลง &lt;code&gt;PROCESSED_MESSAGES table&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id="query-ชาหาก-events-เรมเยอะ"&gt;Query ช้าหาก Events เริ่มเยอะ
+&lt;/h4&gt;&lt;p&gt;ลองคิดว่าเราจะ Query หา &lt;code&gt;entity_id&lt;/code&gt; = 10 เริ่มมีเป็นสิบๆ ร้อยๆ Records ดูสิ แบบนี้ทำไง ทางแก้คือการทำ Snapshot เพื่อทำให้ Query ช้า&lt;/p&gt;
+&lt;p&gt;ขออธิบาย Snapshot ในหัวข้อถัดไปเพราะสำคัญอยู่&lt;/p&gt;
+&lt;h3 id="การทำ-snapshot-เพอประสทธภาพ"&gt;การทำ Snapshot เพื่อประสิทธิภาพ
+&lt;/h3&gt;&lt;p&gt;คงเป็นเรื่องที่ช้าหากเราจะ Replay เป็นร้อยๆ พันๆ Record หากเราทำ Snapshot จะช่วยให้ปริมาณ event ที่ต้อง Replay ลดลงไปได้&lt;/p&gt;
+&lt;p&gt;การทำ Snapshot&lt;/p&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;graph LR
+ subgraph Past_Events [Events in the past]
+ E1((Event 1)) --- E2((Event 2))
+ E2 --- ED[...]
+ ED --- EN((Event N))
+ end
+
+ EN --&gt; Snapshot[/"Snapshot version: N"/]
+
+ subgraph Reconstruction [Current State Reconstruction]
+ direction LR
+ Snapshot --&gt; EN1((Event N+1))
+ EN1 --&gt; EN2((Event N+2))
+ end
+
+ EN2 --&gt; Final((Current State))
+
+ style Snapshot fill:#fff,stroke:#333,stroke-width:2px
+ style Past_Events fill:#f9f9f9,stroke:#ccc,stroke-dasharray: 5 5
+ style Reconstruction fill:#fff,stroke:#333,stroke-dasharray: 5 5&lt;/pre&gt;&lt;p&gt;หากคุณทำ Snapshot ที่ N คุณก็แค่ Replay N+1, N+2, &amp;hellip; โดยที่ไม่ต้องไป Replay 1, 2, 3, 4, &amp;hellip;, N-1 ใหม่&lt;/p&gt;
+&lt;p&gt;โดยการทำ Snapshot คุณสามารถทำโดยการสร้าง &lt;code&gt;SNAPSHOTS Table&lt;/code&gt; ขึ้นมา&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;EVENTS Table&lt;/code&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;event_id&lt;/th&gt;
+ &lt;th&gt;entity_id&lt;/th&gt;
+ &lt;th&gt;entity_type&lt;/th&gt;
+ &lt;th&gt;event_type&lt;/th&gt;
+ &lt;th&gt;event_data&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;7&lt;/td&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;Customer&lt;/td&gt;
+ &lt;td&gt;CreditReserved&lt;/td&gt;
+ &lt;td&gt;{&amp;hellip;}&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;8&lt;/td&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;Customer&lt;/td&gt;
+ &lt;td&gt;AddressChange&lt;/td&gt;
+ &lt;td&gt;{&amp;hellip;}&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;9&lt;/td&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;Customer&lt;/td&gt;
+ &lt;td&gt;NameChange&lt;/td&gt;
+ &lt;td&gt;{&amp;hellip;}&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;10&lt;/td&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;Customer&lt;/td&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;{&amp;hellip;}&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;11&lt;/td&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;Customer&lt;/td&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;{&amp;hellip;}&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;12&lt;/td&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;Customer&lt;/td&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;{&amp;hellip;}&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;code&gt;SNAPSHOTS Table&lt;/code&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;event_id&lt;/th&gt;
+ &lt;th&gt;entity_id&lt;/th&gt;
+ &lt;th&gt;entity_type&lt;/th&gt;
+ &lt;th&gt;snapshot_data&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;10&lt;/td&gt;
+ &lt;td&gt;3&lt;/td&gt;
+ &lt;td&gt;Customer&lt;/td&gt;
+ &lt;td&gt;{&amp;ldquo;name&amp;rdquo;: &amp;hellip;}&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&amp;hellip;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;td&gt;&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;เท่านี้เวลาคุณ Replay event ก็มาที่ Snapshot จะเห็นว่า N = 10 ดังนั้นคุณก็แค่ Replay 11, 12&lt;/p&gt;
+&lt;h2 id="การทำ-event-store"&gt;การทำ Event store
+&lt;/h2&gt;&lt;p&gt;ทำได้ 2 วิธี&lt;/p&gt;
+&lt;h3 id="ทำดวยตวเอง"&gt;ทำด้วยตัวเอง
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;ทำ &lt;code&gt;EVENTS TABLE&lt;/code&gt; เอง&lt;/li&gt;
+&lt;li&gt;ทำ Snapshot เอง&lt;/li&gt;
+&lt;li&gt;รับมือ Concurrency เอง โดยการทำ Optimistic locking&lt;/li&gt;
+&lt;li&gt;ต้องทำกลไกลอ่าน, เขียน Events เอง Replay เอง&lt;/li&gt;
+&lt;li&gt;ต้องทำ Publish event เอง&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;เหนื่อยครับ!&lt;/p&gt;
+&lt;h3 id="event-store-สำเรจรป"&gt;Event store สำเร็จรูป
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;EventStoreDB&lt;/li&gt;
+&lt;li&gt;Axon Server (สาย Java / Spring Boot)&lt;/li&gt;
+&lt;li&gt;Marten (สาย .NET + PostgreSQL)&lt;/li&gt;
+&lt;li&gt;&amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;เป็นต้น&lt;/p&gt;
+&lt;p&gt;บางอันก็ฟรีบางอันก็เสียเงินแต่ข้อดีคือคุณไม่ต้องเสียเวลาในการทำ Event Sourcing เอง&lt;/p&gt;
+&lt;h2 id="ความเขากนกบ-cqrs"&gt;ความเข้ากันกับ CQRS
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;Event Sourcing ทำให้ Query ยาก เลยต้องนำ CQRS มาช่วย&lt;/li&gt;
+&lt;li&gt;Event store ตอบโจทย์ CQRS เนื่องจากการ Replay Event เป็นอีกหนึ่งบทบาทที่ทำให้ CQRS ยืดหยุ่นมาก เพราะทำให้ Scaling จำนวนเครื่อง Read, เปลี่ยน Database, ป้องกันความผิดพลาด&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</title><link>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</link><pubDate>Sat, 18 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</guid><description>&lt;h1 id="domain-driven-design"&gt;Domain Driven Design
 &lt;/h1&gt;
  &lt;blockquote&gt;
  &lt;p&gt;Domain Driven Design เป็นศาสตร์ที่ช่วยในการออกแบบ Business logic และช่วยหาว่าเราต้องมี Service อะไรบ้างใน Microservices&lt;/p&gt;
@@ -910,7 +1286,7 @@
  style S2 fill:#dfd,stroke:#2d2,stroke-width:2px
  style SD1 fill:#f9f,stroke:#333
  style SD2 fill:#f9f,stroke:#333&lt;/pre&gt;&lt;h4 id="ubiquitous-language"&gt;Ubiquitous Language
-&lt;/h4&gt;&lt;p&gt;คือ &lt;strong&gt;&amp;ldquo;ภาษากลาง&amp;rdquo;&lt;/strong&gt; ที่ทุกคนในทีมใช้แบบเดียวกันทั้งทีมธุรกิจและทีมนักพัฒนา&lt;/p&gt;
+&lt;/h4&gt;&lt;p&gt;คือ &lt;strong&gt;&amp;ldquo;ภาษากลาง&amp;rdquo;&lt;/strong&gt; ที่ทุกคนในทีมใช้แบบเดียวกันทั้งทีมธุรกิจและทีมนักพัฒนา เพื่อป้องกันการสื่อสารคลาดเคลื่อน การเขียนโค้ดก็จะใช้ภาษานี้ด้วย&lt;/p&gt;
 &lt;h4 id="คำแนะนำ"&gt;คำแนะนำ
 &lt;/h4&gt;&lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;Single Responsibility Principle - SRP&lt;/strong&gt;&lt;/li&gt;
@@ -919,94 +1295,7 @@
 &lt;ol start="2"&gt;
 &lt;li&gt;&lt;strong&gt;Common Closure Principle - CCP&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;หากมีกลุ่ม Services ไหนต้องมีการเปลี่ยงแปลงตามธุรกิจที่เปลี่ยนไปตามกาลเวลา พร้อมกันและเหตุผลในการเปลี่ยนเดียวกัน ควรจับมาอยู่ใน Service เดียวกัน&lt;/p&gt;</description></item><item><title>Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</title><link>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</link><pubDate>Sat, 18 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</guid><description>&lt;h1 id="event-sourcing"&gt;Event sourcing
-&lt;/h1&gt;
- &lt;blockquote&gt;
- &lt;p&gt;โดยปกติแล้วการบันทึกข้อมูลลงฐานข้อมูลนั้นเราจะบันทึกแค่ค่าปัจจุบันของ Record นั้นๆ แต่ปัญหาที่ตามมาคือเราจะไม่เห็นประวัติเก่าของ Record นั้นๆ ดังนั้น Event sourcing จึงมาแก้ปัญหาดังกล่าว&lt;/p&gt;
-
- &lt;/blockquote&gt;
-&lt;h2 id="ประเภทของการเกบขอมล"&gt;ประเภทของการเก็บข้อมูล
-&lt;/h2&gt;&lt;ol&gt;
-&lt;li&gt;State-oriented Persistence (การเก็บสถานะปัจจุบัน) เป็นแบบที่เราคุ้นเคยเลยเก็ยสถานะปัจจุบันของข้อมูล แต่ประวัติหายหมด&lt;/li&gt;
-&lt;/ol&gt;
-&lt;table&gt;
- &lt;thead&gt;
- &lt;tr&gt;
- &lt;th style="text-align: left"&gt;account_id&lt;/th&gt;
- &lt;th style="text-align: left"&gt;customer_name&lt;/th&gt;
- &lt;th style="text-align: left"&gt;balance&lt;/th&gt;
- &lt;th style="text-align: left"&gt;last_updated&lt;/th&gt;
- &lt;th style="text-align: left"&gt;status&lt;/th&gt;
- &lt;/tr&gt;
- &lt;/thead&gt;
- &lt;tbody&gt;
- &lt;tr&gt;
- &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
- &lt;td style="text-align: left"&gt;Somchai Dee&lt;/td&gt;
- &lt;td style="text-align: left"&gt;&lt;strong&gt;850.00&lt;/strong&gt;&lt;/td&gt;
- &lt;td style="text-align: left"&gt;2024-05-20 10:30:00&lt;/td&gt;
- &lt;td style="text-align: left"&gt;Active&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td style="text-align: left"&gt;ACC-002&lt;/td&gt;
- &lt;td style="text-align: left"&gt;Somsak Range&lt;/td&gt;
- &lt;td style="text-align: left"&gt;&lt;strong&gt;1,200.00&lt;/strong&gt;&lt;/td&gt;
- &lt;td style="text-align: left"&gt;2024-05-19 14:15:00&lt;/td&gt;
- &lt;td style="text-align: left"&gt;Active&lt;/td&gt;
- &lt;/tr&gt;
- &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;ol start="2"&gt;
-&lt;li&gt;Event Sourcing (Event-oriented Persistence) เป็นแบบที่เน้นเก็บทุกสถานะของข้อมูลลงในฐานข้อมูล แล้วค่อยนำกลับมารวมกันคำนวณเป็นสถานะปัจจุบันแทน ซึ่งข้อดีคือประวัติยังอยู่&lt;/li&gt;
-&lt;/ol&gt;
-&lt;table&gt;
- &lt;thead&gt;
- &lt;tr&gt;
- &lt;th style="text-align: left"&gt;event_id&lt;/th&gt;
- &lt;th style="text-align: left"&gt;account_id&lt;/th&gt;
- &lt;th style="text-align: left"&gt;event_type&lt;/th&gt;
- &lt;th style="text-align: left"&gt;amount&lt;/th&gt;
- &lt;th style="text-align: left"&gt;timestamp&lt;/th&gt;
- &lt;/tr&gt;
- &lt;/thead&gt;
- &lt;tbody&gt;
- &lt;tr&gt;
- &lt;td style="text-align: left"&gt;1&lt;/td&gt;
- &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
- &lt;td style="text-align: left"&gt;&lt;strong&gt;AccountOpened&lt;/strong&gt;&lt;/td&gt;
- &lt;td style="text-align: left"&gt;0.00&lt;/td&gt;
- &lt;td style="text-align: left"&gt;2024-05-20 09:00:00&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td style="text-align: left"&gt;2&lt;/td&gt;
- &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
- &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyDeposited&lt;/strong&gt;&lt;/td&gt;
- &lt;td style="text-align: left"&gt;1000.00&lt;/td&gt;
- &lt;td style="text-align: left"&gt;2024-05-20 09:15:00&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td style="text-align: left"&gt;3&lt;/td&gt;
- &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
- &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyWithdrawn&lt;/strong&gt;&lt;/td&gt;
- &lt;td style="text-align: left"&gt;150.00&lt;/td&gt;
- &lt;td style="text-align: left"&gt;2024-05-20 10:30:00&lt;/td&gt;
- &lt;/tr&gt;
- &lt;tr&gt;
- &lt;td style="text-align: left"&gt;4&lt;/td&gt;
- &lt;td style="text-align: left"&gt;ACC-001&lt;/td&gt;
- &lt;td style="text-align: left"&gt;&lt;strong&gt;MoneyWithdrawn&lt;/strong&gt;&lt;/td&gt;
- &lt;td style="text-align: left"&gt;200.00&lt;/td&gt;
- &lt;td style="text-align: left"&gt;2024-05-20 11:00:00&lt;/td&gt;
- &lt;/tr&gt;
- &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;ซึ่งสถานะปัจจุบันของ &lt;code&gt;ACC-001&lt;/code&gt; คือ 0.00 + 1000.00 - 150.00 - 200.00 = &lt;strong&gt;650.00&lt;/strong&gt;&lt;/p&gt;
-&lt;h2 id="event-sourcing-1"&gt;Event sourcing
-&lt;/h2&gt;&lt;h3 id="ลกษณะ"&gt;ลักษณะ
-&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;Event-oriented Persistence เก็บทุกสถานะแล้วนำมารวมเป็นข้อมูล&lt;/li&gt;
-&lt;li&gt;&lt;/li&gt;
-&lt;/ul&gt;</description></item><item><title>Microservice ตอนที่ 4 Queries in Microservice</title><link>https://Nextjingjing.github.io/blogs/microservice/04-query/</link><pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/04-query/</guid><description>&lt;h1 id="การทำ-query-ใน-microservice"&gt;การทำ Query ใน Microservice
+&lt;p&gt;หากมีกลุ่ม Services ไหนต้องมีการเปลี่ยงแปลงตามธุรกิจที่เปลี่ยนไปตามกาลเวลา พร้อมกันและเหตุผลในการเปลี่ยนเดียวกัน ควรจับมาอยู่ใน Service เดียวกัน&lt;/p&gt;</description></item><item><title>Microservice ตอนที่ 4 Queries in Microservice</title><link>https://Nextjingjing.github.io/blogs/microservice/04-query/</link><pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/04-query/</guid><description>&lt;h1 id="การทำ-query-ใน-microservice"&gt;การทำ Query ใน Microservice
 &lt;/h1&gt;
  &lt;blockquote&gt;
  &lt;p&gt;การ Query เพื่อขออ่านจากหลายๆ Databases เป็นเรื่องที่ท้าทายกว่า Monolith เพราะแต่ละ Service ใน Microservice นั้นต่างก็มี Database เป็นของตนเอง&lt;/p&gt;
