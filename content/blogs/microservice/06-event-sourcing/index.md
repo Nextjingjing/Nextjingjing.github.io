@@ -222,3 +222,5 @@ graph LR
 ## ความเข้ากันกับ CQRS
 - Event Sourcing ทำให้ Query ยาก เลยต้องนำ CQRS มาช่วย
 - Event store ตอบโจทย์ CQRS เนื่องจากการ Replay Event เป็นอีกหนึ่งบทบาทที่ทำให้ CQRS ยืดหยุ่นมาก เพราะทำให้ Scaling จำนวนเครื่อง Read, เปลี่ยน Database, ป้องกันความผิดพลาด
+
+{{< page-nav prev-link="../05-ddd/" next-link="../07-api-gateway/">}}

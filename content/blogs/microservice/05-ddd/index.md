@@ -815,3 +815,5 @@ graph TD
 2. **Common Closure Principle - CCP**
 
 หากมีกลุ่ม Services ไหนต้องมีการเปลี่ยงแปลงตามธุรกิจที่เปลี่ยนไปตามกาลเวลา พร้อมกันและเหตุผลในการเปลี่ยนเดียวกัน ควรจับมาอยู่ใน Service เดียวกัน
+
+{{< page-nav prev-link="../04-query/" next-link="../06-event-sourcing/">}}

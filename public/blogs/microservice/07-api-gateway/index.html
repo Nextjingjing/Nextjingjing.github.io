@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Microservice ตอนที่ 7 API Gateway">
+<title>Microservice ตอนที่ 7 API Gateway</title>
+
+
+<link rel="canonical" href="http://localhost:1313/blogs/microservice/07-api-gateway/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
+
+
+<link rel="stylesheet" href="/scss/style.min.4df4c8522cc0ad28c20cdfcea7f6cfa3a509d0c92276499cf4ceb49306afe6a1.css"><meta property='og:title' content="Microservice ตอนที่ 7 API Gateway">
+<meta property='og:description' content="Microservice ตอนที่ 7 API Gateway">
+<meta property='og:url' content='http://localhost:1313/blogs/microservice/07-api-gateway/'>
+<meta property='og:site_name' content='Nextjingjing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Blogs' /><meta property='article:tag' content='Microservice' /><meta property='article:tag' content='Backend' /><meta property='article:published_time' content='2026-04-29T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-04-29T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Microservice ตอนที่ 7 API Gateway">
+<meta name="twitter:description" content="Microservice ตอนที่ 7 API Gateway">
+    <link rel="shortcut icon" href="/img/profile.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        <figure class="site-avatar">
+                <a href="/">
+                    <img src="/img/profile.png" 
+                        width="860"
+                        height="1063"
+                        class="site-logo"
+                        loading="lazy"
+                        alt="Avatar">
+                </a>
+                
+                    <span class="emoji">😊</span>
+                
+            </figure>
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Nextjingjing</a></h1>
+            <h2 class="site-description">Hello, I&#39;m Nextjingjing. I&#39;m interested in Development and DevOps, and I love sharing my knowledge through blogging.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://www.facebook.com/pruek.tanvorakul/'
+                        
+                        title="Facebook"
+                        rel="me"
+                    >
+                        
+                        
+                            <?xml version="1.0" encoding="utf-8"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect width="16" height="16" id="icon-bound" fill="none" />
+  <path d="M15.117,0H0.883C0.395,0,0,0.395,0,0.883v14.234C0,15.605,0.395,16,0.883,16h7.664V9.812H6.469V7.391h2.078V5.608 c0-2.067,1.262-3.192,3.106-3.192c0.883,0,1.642,0.066,1.863,0.095v2.16l-1.271,0.001c-1.003,0-1.197,0.477-1.197,1.176v1.543h2.398 l-0.312,2.422h-2.086V16h4.07C15.605,16,16,15.605,16,15.117V0.883C16,0.395,15.605,0,15.117,0z" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/Nextjingjing'
+                        
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/next_pruek/'
+                        
+                        title="Instagram."
+                        rel="me"
+                    >
+                        
+                        
+                            <?xml version="1.0" ?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 32 32" id="Camada_1" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+</style>
+<path d="M6,2h20c2.2,0,4,1.8,4,4v20c0,2.2-1.8,4-4,4H6c-2.2,0-4-1.8-4-4V6C2,3.8,3.8,2,6,2z"/>
+<g>
+<path class="st0" d="M21.3,9.7c-0.6,0-1.2,0.5-1.2,1.2c0,0.7,0.5,1.2,1.2,1.2c0.7,0,1.2-0.5,1.2-1.2C22.4,10.2,21.9,9.7,21.3,9.7z"/>
+<path class="st0" d="M16,11.2c-2.7,0-4.9,2.2-4.9,4.9c0,2.7,2.2,4.9,4.9,4.9s4.9-2.2,4.9-4.9C21,13.4,18.8,11.2,16,11.2z M16,19.3   c-1.7,0-3.2-1.4-3.2-3.2c0-1.7,1.4-3.2,3.2-3.2c1.7,0,3.2,1.4,3.2,3.2C19.2,17.9,17.8,19.3,16,19.3z"/>
+<path class="st0" d="M20,6h-8c-3.3,0-6,2.7-6,6v8c0,3.3,2.7,6,6,6h8c3.3,0,6-2.7,6-6v-8C26,8.7,23.3,6,20,6z M24.1,20   c0,2.3-1.9,4.1-4.1,4.1h-8c-2.3,0-4.1-1.9-4.1-4.1v-8c0-2.3,1.9-4.1,4.1-4.1h8c2.3,0,4.1,1.9,4.1,4.1V20z"/>
+</g>
+</svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/about/' >
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/archives/' >
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/search/' >
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav class="toc-nav" id="TableOfContents">
+                
+  <ol>
+    <li><a href="#รปแบบการสอสารของ-client">รูปแบบการสื่อสารของ Client</a></li>
+    <li><a href="#ประเดนอนๆ">ประเด็นอื่นๆ</a></li>
+    <li><a href="#สอสารกบ-service-โดยตรง">สื่อสารกับ Service โดยตรง</a>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#ขอด">ข้อดี</a></li>
+            <li><a href="#ขอเสย">ข้อเสีย</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#api-gateway-1">API Gateway</a>
+      <ol>
+        <li><a href="#ลกษณะ">ลักษณะ</a></li>
+        <li><a href="#สถาปตยกรรม-api-gateway">สถาปัตยกรรม API Gateway</a></li>
+        <li><a href="#ประเดนอนๆ-1">ประเด็นอื่นๆ</a></li>
+        <li><a href="#backend-for-frontend">Backend For Frontend</a></li>
+        <li><a href="#ขอด-1">ข้อดี</a></li>
+        <li><a href="#ขอเสย-1">ข้อเสีย</a></li>
+        <li><a href="#ประเดนอนๆ-2">ประเด็นอื่นๆ</a>
+          <ol>
+            <li><a href="#scalability-และ-performance">Scalability และ Performance</a></li>
+            <li><a href="#การรบมอ-error">การรับมือ Error</a></li>
+            <li><a href="#ทำ-discovery">ทำ Discovery</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#การ-implement-api-gateway">การ Implement API gateway</a>
+      <ol>
+        <li><a href="#สงทตองทำ">สิ่งที่ต้องทำ</a></li>
+        <li><a href="#ใช-off-shelf-api-gateway-สำเรจรป">ใช้ Off-shelf API Gateway สำเร็จรูป</a></li>
+        <li><a href="#ใชของททำเอง">ใช้ของที่ทำเอง</a></li>
+      </ol>
+    </li>
+    <li><a href="#graphql">GraphQL</a></li>
+  </ol>
+
+            </nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+            
+            
+            <a href="/categories/blogs/" style="background-color: hsl(334, 60%, 84%); color: hsl(334, 60%, 15%);">
+                Blogs
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/blogs/microservice/07-api-gateway/">Microservice ตอนที่ 7 API Gateway</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Microservice ตอนที่ 7 API Gateway
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    
+    
+    
+    <footer class="article-meta">
+        
+            <div class="inline-meta">
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                    <time class="article-time--published" datetime='2026-04-29T00:00:00Z'>Wednesday, April 29, 2026</time>
+                
+
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                    <time class="article-time--reading">
+                        5 minutes read
+                    </time>
+                
+            </div>
+        
+
+        
+
+        
+    </footer>
+    
+</div>
+
+</header>
+
+    
+    <aside class="article-toc">
+        <details>
+            <summary>
+                <div class="article-toc-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
+                    <span>Table of contents</span>
+                </div>
+            </summary>
+            <nav class="toc-nav">
+                
+  <ol>
+    <li><a href="#รปแบบการสอสารของ-client">รูปแบบการสื่อสารของ Client</a></li>
+    <li><a href="#ประเดนอนๆ">ประเด็นอื่นๆ</a></li>
+    <li><a href="#สอสารกบ-service-โดยตรง">สื่อสารกับ Service โดยตรง</a>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#ขอด">ข้อดี</a></li>
+            <li><a href="#ขอเสย">ข้อเสีย</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#api-gateway-1">API Gateway</a>
+      <ol>
+        <li><a href="#ลกษณะ">ลักษณะ</a></li>
+        <li><a href="#สถาปตยกรรม-api-gateway">สถาปัตยกรรม API Gateway</a></li>
+        <li><a href="#ประเดนอนๆ-1">ประเด็นอื่นๆ</a></li>
+        <li><a href="#backend-for-frontend">Backend For Frontend</a></li>
+        <li><a href="#ขอด-1">ข้อดี</a></li>
+        <li><a href="#ขอเสย-1">ข้อเสีย</a></li>
+        <li><a href="#ประเดนอนๆ-2">ประเด็นอื่นๆ</a>
+          <ol>
+            <li><a href="#scalability-และ-performance">Scalability และ Performance</a></li>
+            <li><a href="#การรบมอ-error">การรับมือ Error</a></li>
+            <li><a href="#ทำ-discovery">ทำ Discovery</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#การ-implement-api-gateway">การ Implement API gateway</a>
+      <ol>
+        <li><a href="#สงทตองทำ">สิ่งที่ต้องทำ</a></li>
+        <li><a href="#ใช-off-shelf-api-gateway-สำเรจรป">ใช้ Off-shelf API Gateway สำเร็จรูป</a></li>
+        <li><a href="#ใชของททำเอง">ใช้ของที่ทำเอง</a></li>
+      </ol>
+    </li>
+    <li><a href="#graphql">GraphQL</a></li>
+  </ol>
+
+            </nav>
+        </details>
+    </aside>
+    
+
+    <section class="article-content">
+    
+    
+    <h1 id="api-gateway">API Gateway
+</h1>
+    <blockquote>
+        <p>มีข้อเสียหากเราให้ Client สื่อสารโดยตรงกับ Service อยู่มากมาย ดังนั้นเรามาดูวิธีแก้ไขมันกัน</p>
+<p>ปล. Client ในที่นี้คือ Browser App, Mobile App, Desktop App, &hellip;</p>
+
+    </blockquote>
+<h2 id="รปแบบการสอสารของ-client">รูปแบบการสื่อสารของ Client
+</h2><ul>
+<li>สื่อสารกับ Service โดยตรง</li>
+<li>การสื่อสารโดยมีตัวกลาง
+<ul>
+<li>API gateway</li>
+<li>Backend For Frontend (BFF)</li>
+</ul>
+</li>
+</ul>
+<h2 id="ประเดนอนๆ">ประเด็นอื่นๆ
+</h2>
+    <blockquote>
+        <p>แต่ละ Client มีความต้องการที่ไม่เหมือนกัน เช่น Mobile app, Browser app ต่างก็มีความต้องการชุดข้อมูลไม่เหมือนกัน เป็นต้น ทำให้ยากที่จะทำ 1 API Composition ที่ Fit-in กับทุกๆ Client</p>
+
+    </blockquote>
+<p>ดังนั้นบางครั้งเราจึงทำ API Composition (บทที่ 4) แยกกันแต่ละประเภทของ Client ด้วย
+เช่น อาจจะมี Mobile API, Browser API โดยเฉพาะแยกตามความต้องการเดี๋ยวเราจะรู้แนวคิดนี้กันอีกที</p>
+<h2 id="สอสารกบ-service-โดยตรง">สื่อสารกับ Service โดยตรง
+</h2><h4 id="ขอด">ข้อดี
+</h4><ul>
+<li>ง่ายไม่ซับซ้อน</li>
+</ul>
+<h4 id="ขอเสย">ข้อเสีย
+</h4><ul>
+<li>หากต้องการให้หลายๆ ข้อมูลที่กระจายไปทั่วๆ Service แล้วจำเป็นต้องส่งหลายๆ Request
+<ul>
+<li>หากผู้ใช้เน็ตกากจะทำให้เขาหงุดหงิดรอ</li>
+<li>หากผู้ใช้มาจากมือถือจะเปลืองแบต</li>
+</ul>
+</li>
+<li>ขาดการ Encapsulation เช่น หาก Service มีการเปลี่ยนแปลงแค่ 1 Service ต้องแก้ทุกๆ Client</li>
+<li>หากใช้ IPC ที่ไม่เป็นมิตรกับ Client อาจทำให้การสื่อสารลำบากขึ้น
+<ul>
+<li>เช่น หาก Service ที่เราใช้ gRPC แต่ Client มาจาก Web app จะทำไง</li>
+</ul>
+</li>
+</ul>
+<h2 id="api-gateway-1">API Gateway
+</h2>
+    <blockquote>
+        <p><strong>Important Note</strong> 📝:</p>
+<p>API Gateway เป็นจุดแรกที่ Client จากภายนอกเข้ามาใน Microservice</p>
+
+    </blockquote>
+<pre class="mermaid" style="visibility:hidden">graph LR
+    subgraph Clients
+        C1[📱 Mobile App]
+        C2[💻 Web Browser]
+    end
+
+    subgraph "API Management Layer"
+        GW{{"🛡️ API Gateway"}}
+    end
+
+    subgraph "Microservices Cluster"
+        S1[📦 Product Service]
+        S2[🛒 Order Service]
+        S3[👤 User Service]
+        S4[💳 Payment Service]
+    end
+
+    %% Connections
+    C1 --> GW
+    C2 --> GW
+
+    GW -- "/products" --> S1
+    GW -- "/orders" --> S2
+    GW -- "/users" --> S3
+    GW -- "/pay" --> S4
+
+    %% Styling
+    style GW fill:#f96,stroke:#333,stroke-width:2px
+    style S1 fill:#bbf
+    style S2 fill:#bbf
+    style S3 fill:#bbf
+    style S4 fill:#bbf</pre><h3 id="ลกษณะ">ลักษณะ
+</h3><ul>
+<li>เป็นจุดแรกที่ Client เข้ามา</li>
+<li>Request routing เป็นคนนำพาไปส่งหา Service ต่างๆ</li>
+<li>API composition เช่น การ Query มันจะรวบรวมข้อมูลที่กระจายไปทั่ว Service ต่างๆให้</li>
+<li>เป็นตัวแปล Protocol เช่น Service A ใช้ gRPC ดังนั้น Client จาก Browser app ที่ใช้ HTTPs สามารถคุยกับ Service A ได้เพราะมีคนแปลให้</li>
+<li>มี API layer เพื่อแยก API ให้แต่ละ Client เช่น Mobile app, Browser app, &hellip;</li>
+<li><strong>(ทางเลือก/ไม่จำเป็น)</strong> มี Function ต่างๆ ได้
+<ul>
+<li>Authentication/Authorization ยืนยันตัวตน</li>
+<li>Rate limiting กันคนยิง Request รัวๆ</li>
+<li>Caching</li>
+<li>Monitoring</li>
+<li>Request logging</li>
+</ul>
+</li>
+</ul>
+
+    <blockquote>
+        <p>จริงๆ เราสามารถทำ Function (Authentication/Authorization, Rate limiting, Caching, &hellip;) ได้สามรูปแบบคือ</p>
+<ol>
+<li>ทำที่ Service ไปเลย (แต่จะดูแปลกๆ เพราะจริงๆ เราควรยืนยันตัวตนที่หน้าบ้านไม่ใช่ในบ้าน)</li>
+<li>ทำ Service พิเศษไปอยู่หน้า API gateway (ข้อเสียคือเพิ่ม Latency เพราะต้องไปที่ service พิเศษ 🡆 API Gateway 🡆 Service เบื้องหลังต่างๆ แต่ข้อดีคือ หากมีหลายๆ Gateway จะทำให้มี Logic อยู่ที่เดียวกันนั้นเอง)</li>
+<li>ทำใน API Gateway ไปเลย (ข้อดีคือ ไม่มี Latency ข้อเสียคือหากมีหลายๆ Gateway จะมี Logic กระจายไปทั่ว)</li>
+</ol>
+
+    </blockquote>
+<h3 id="สถาปตยกรรม-api-gateway">สถาปัตยกรรม API Gateway
+</h3><pre class="mermaid" style="visibility:hidden">graph TD
+    %% Client Layer
+    subgraph Clients [External Clients]
+        Mobile[Mobile client]
+        Browser[Browser JavaScript application]
+        ThirdParty[3rd-party application]
+    end
+
+    %% API Gateway Layer
+    subgraph APIGateway [API Gateway]
+        subgraph APILayer [API Layer]
+            MobileAPI[Mobile API]
+            BrowserAPI[Browser API]
+            PublicAPI[Public API]
+        end
+
+        CommonLayer[Common layer <br/><i>Authentication, Rate Limiting, Logging, etc.</i>]
+    end
+
+    %% Relationships
+    Mobile --> MobileAPI
+    Browser --> BrowserAPI
+    ThirdParty --> PublicAPI
+
+    MobileAPI --> CommonLayer
+    BrowserAPI --> CommonLayer
+    PublicAPI --> CommonLayer
+
+    %% Styling
+    style Mobile fill:#fff2cc,stroke:#d6b656
+    style Browser fill:#fff2cc,stroke:#d6b656
+    style ThirdParty fill:#fff2cc,stroke:#d6b656
+    
+    style APIGateway fill:#d5e8d4,stroke:#82b366
+    style APILayer fill:#fff,stroke:#000
+    style CommonLayer fill:#fff,stroke:#000
+    
+    style MobileAPI fill:#d5e8d4,stroke:#82b366
+    style BrowserAPI fill:#d5e8d4,stroke:#82b366
+    style PublicAPI fill:#d5e8d4,stroke:#82b366</pre><ul>
+<li><strong>API layer</strong> ใช้แยกแต่ละประเภทของผู้ใช้ เช่น Mobile client, Browser JavaScript application, 3rd-party application</li>
+<li><strong>Common layer</strong> เป็นชั้นที่ทำ Function พิเศษต่างๆ Authentication, Rate Limiting, Logging, &hellip;</li>
+<li>Client 🡆 API gateway 🡆 Service ต่างๆ</li>
+</ul>
+<h3 id="ประเดนอนๆ-1">ประเด็นอื่นๆ
+</h3><ul>
+<li>การมี API Gateway เพียงแค่ 1 อัน ก็มีข้อเสียอยู่ได้แก่
+<ul>
+<li>ขาดความ Autonomy (ความเป็นอิสระของทีม) เช่น หากทีม Mobile อยากให้ API Gateway เป็นอย่างนั้น แต่ทีม Browser อยากให้เป็นอย่างโน้น ทำให้ความต้องการของแต่ละทีมไม่มีอิสระของตนเอง</li>
+</ul>
+</li>
+</ul>
+<h3 id="backend-for-frontend">Backend For Frontend
+</h3>
+    <blockquote>
+        <p><strong>Important Note</strong> 📝:</p>
+<p>Backend For Frontend Pattern คือการมีหลายๆ API Gateway ตามประเภทของ Client เพื่อให้เกิดความ Autonomy (ความเป็นอิสระของทีม)</p>
+
+    </blockquote>
+<pre class="mermaid" style="visibility:hidden">graph TD
+    %% Teams
+    subgraph MobileTeam ["Mobile client team"]
+        M_User(( ))
+    end
+
+    subgraph BrowserTeam ["Browser client team"]
+        B_User(( ))
+    end
+
+    subgraph PublicTeam ["Public API team"]
+        P_User(( ))
+    end
+
+    %% Applications
+    MobileApp[Mobile client]
+    BrowserApp[Browser JavaScript application]
+    ThirdPartyApp[3rd-party application]
+
+    %% Connections Teams to Apps & Gateways
+    M_User -.-> MobileApp
+    M_User -. "Owns" .-> MobileAPI
+    
+    B_User -.-> BrowserApp
+    B_User -. "Owns" .-> BrowserAPI
+    
+    P_User -.-> ThirdPartyApp
+    P_User -. "Owns" .-> PublicAPI
+
+    %% Mobile Gateway
+    subgraph MobileGateway [Mobile API gateway]
+        direction TB
+        subgraph MobileAPILayer [API layer]
+            MobileAPI[Mobile API]
+        end
+        MobileCommon[Common layer]
+        MobileAPI --> MobileCommon
+    end
+
+    %% Browser Gateway
+    subgraph BrowserGateway [Browser API gateway]
+        direction TB
+        subgraph BrowserAPILayer [API layer]
+            BrowserAPI[Browser API]
+        end
+        BrowserCommon[Common layer]
+        BrowserAPI --> BrowserCommon
+    end
+
+    %% Public Gateway
+    subgraph PublicGateway [Public API gateway]
+        direction TB
+        subgraph PublicAPILayer [API layer]
+            PublicAPI[Public API]
+        end
+        PublicCommon[Common layer]
+        PublicAPI --> PublicCommon
+    end
+
+    %% Flow from Apps to Gateways
+    MobileApp --> MobileAPI
+    BrowserApp --> BrowserAPI
+    ThirdPartyApp --> PublicAPI
+
+    %% Styling
+    style MobileGateway fill:#c1e1c1,stroke:#333
+    style BrowserGateway fill:#c1e1c1,stroke:#333
+    style PublicGateway fill:#c1e1c1,stroke:#333
+    style MobileAPI fill:#b8daba,stroke:#333
+    style BrowserAPI fill:#b8daba,stroke:#333
+    style PublicAPI fill:#b8daba,stroke:#333
+    style BrowserApp fill:#ffffa0,stroke:#333
+    style ThirdPartyApp fill:#ffffa0,stroke:#333</pre><ul>
+<li>จะเห็นว่าแต่ละทีม Dev สามารถมีอิสระให้กับ API Gateway ของตนเอง ทำให้มี Autonomy (ความเป็นอิสระของทีม) เปลี่ยนแปลงอะไรก็ได้ตามใจทีมตนเอง
+<ul>
+<li>เช่น สามารถเปลี่ยน <strong>Common layer</strong> ได้ตามใจทีมตนเอง เพื่อให้เหมาะสมกับ API ของตนเอง</li>
+</ul>
+</li>
+</ul>
+
+    <blockquote>
+        <p><strong>คำแนะนำ</strong>:</p>
+<p>เราควรใช้ API Gateway เป็นตัวเลือกแรก เพราะ BFF นั้นทำให้ระบบซับซ้อนมากขึ้น และใช้ BFF เมื่อแต่ละทีมมีความต้องการ Gateway ไม่เหมือนกันเท่านั้น</p>
+
+    </blockquote>
+<h3 id="ขอด-1">ข้อดี
+</h3><ul>
+<li>Encapsulation ซ่อนความซับซ้อนของ Services ทำให้เวลามีการเปลี่ยนแปลง Services ต่างๆ จะไม่ส่งผลกระทบกับ Client มากนัก</li>
+<li>มอบ API สำหรับ Client โดยเฉพาะ เช่น แยก Browser API, Mobile API, &hellip;</li>
+<li>เป็นทางเข้าแรก ทำให้ Function พิเศษได้ เช่น Authentication, &hellip;</li>
+</ul>
+<h3 id="ขอเสย-1">ข้อเสีย
+</h3><ul>
+<li>ถ้า API gateway ช้า จะทำให้ทั้งระบบช้า เพราะเป็นคอขวด</li>
+</ul>
+<h3 id="ประเดนอนๆ-2">ประเด็นอื่นๆ
+</h3><h4 id="scalability-และ-performance">Scalability และ Performance
+</h4><p>API Gate way สามารถทำ I/O ได้สองรูปแบบคือ</p>
+<ul>
+<li>Synchronous I/O (Blocking)
+<ul>
+<li>1 Request = 1 Thread</li>
+<li>ข้อดี: เขียนโปรแกรมง่าย ตรงไปตรงมา</li>
+<li>ข้อเสีย: สิ้นเปลืองทรัพยากร</li>
+</ul>
+</li>
+<li>Asynchronous I/O (Non-blocking)
+<ul>
+<li>จัดการ Thread ได้ดีกว่า</li>
+<li>ข้อดี: ไม่สิ้นเปลืองทรัพยากร</li>
+<li>ข้อเสีย: เขียนโปรแกรมยาก แก้บั๊กยาก</li>
+</ul>
+</li>
+</ul>
+<h4 id="การรบมอ-error">การรับมือ Error
+</h4><ul>
+<li>ถ้าทำ API Composition ควรจะทำ Circuit breaker แบบบทที่ 2</li>
+</ul>
+<h4 id="ทำ-discovery">ทำ Discovery
+</h4><p>หากมีการใช้ Synchronous remote procedure invocation  บทที่ 2 ควรจะทำ Discovery Service</p>
+<ul>
+<li>Client-Side Discovery</li>
+<li>Server-Side Discovery</li>
+</ul>
+<h2 id="การ-implement-api-gateway">การ Implement API gateway
+</h2><h3 id="สงทตองทำ">สิ่งที่ต้องทำ
+</h3><ol>
+<li>Request routing พาไปหา Service ที่ต้องการ</li>
+<li>API composition รวบรวมคำตอบของแต่ละ Service และรวม</li>
+<li>(Optional) Function พิเศษ เช่น Authentication, Logging, &hellip;</li>
+<li>(Optional) Protocol translation หากมีการใช้ Protocol ที่ Client ใช้งานได้ยาก</li>
+<li>(Optional) Discovery  Service</li>
+</ol>
+
+    <blockquote>
+        <p>จะเห็นว่าสิ่งที่ต้องทำเยอะมาก</p>
+
+    </blockquote>
+<h3 id="ใช-off-shelf-api-gateway-สำเรจรป">ใช้ Off-shelf API Gateway สำเร็จรูป
+</h3><ul>
+<li>ข้อดี: ง่าย แค่ตั้งค่าให้ถูก มี</li>
+<li>ข้อเสีย: ไม่ยืดหยุ่นเพราะต้องใช้ตามที่เขามีมาให้</li>
+<li>เช่น AWS Gateway, Kong, &hellip;</li>
+</ul>
+<h3 id="ใชของททำเอง">ใช้ของที่ทำเอง
+</h3><ul>
+<li>ข้อดี: ยืดหยุ่นสูง ทุกอย่างเรากำหนด</li>
+<li>ข้อเสีย: เริ่มได้ช้า ต้องทำทุกอย่างเอง</li>
+<li>เช่น Spring Cloud Gateway, Node.js (Express / Fastify), Go (Gin / Echo), GraphQL</li>
+</ul>
+<h2 id="graphql">GraphQL
+</h2><p><img alt="GraphQL Icon" class="gallery-image" data-flex-basis="240px" data-flex-grow="100" height="600" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="/blogs/microservice/07-api-gateway/graphql-1732132118455.png" width="600"></p>
+<p>หัวข้อสุดท้ายบางคร้ังเรามี Clients หลายๆ ประเภทมันคงยากมากๆ ที่จะทำ 1 API ให้ Fit กับทุกๆ Clients ได้ เช่น Mobile Client อาจจะมีความต้องการ Fields ของข้อมูลที่น้อยกว่า เป็นต้น</p>
+<p>ปัญหาดังกล่าวสามารถแก้ได้โดย <strong>GraphQL</strong> ทีนี้อยากให้สังเกตที่คำว่า <strong>&ldquo;QL&rdquo;</strong> มาจาก Query language นั้นเอง ดังนั้นเจ้าตัวนี้จึงมีความสามารถให้แต่ละ Client เลือก field ข้อมูลที่สนใจเองได้เลย โดยไม่ต้องแยก API ตามแต่ละ Client เหมือนหัวข้อก่อนๆ</p>
+<p>เช่น Mobile Client อาจจะเรียกแบบนี้</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-graphql" data-lang="graphql"><span class="line"><span class="cl"><span class="kd">query</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nc">user</span><span class="p">(</span><span class="py">id</span><span class="p">:</span><span class="w"> </span><span class="s">&#34;123&#34;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nc">name</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="py">avatarUrl</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>ขอ User แค่ 2 fields ได้แก่</p>
+<ul>
+<li>name</li>
+<li>avatarUrl</li>
+</ul>
+<div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        
+        <a href="./06-event-sourcing/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;">
+            ← หน้าก่อนหน้า
+        </a>
+        
+    </div>
+
+    <div>
+        
+        <a href="/post/microservice/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;">
+            ตอนถัดไป →
+        </a>
+        
+    </div>
+</div>
+
+</section>
+
+
+    <footer class="article-meta article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/microservice/">Microservice</a>
+        
+            <a href="/tags/backend/">Backend</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright inline-meta">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under <a class="link" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"  target="_blank" rel="noopener"
+    >CC BY-NC-SA 4.0</a></span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside>
+    <h2 class="section-title">Related content</h2>
+    <div class="subsection-list">
+        <div class="article-list--tile">
+            
+                
+<article class="">
+    <a href="/blogs/microservice/06-event-sourcing/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/05-ddd/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/04-query/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 4 Queries in Microservice</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/03-saga/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 3 saga pattern</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/02-ipc/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 2 Inter process communication (IPC)</h2>
+        </div>
+    </a>
+</article>
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2026 Nextjingjing
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="4.0.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+
+
+
+<script type="module">
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script>
+    <div class="mermaid-modal" id="mermaid-modal">
+    <div class="mermaid-modal-header">
+        <div class="mermaid-modal-controls">
+            <button data-zoom="-1">− Zoom Out</button>
+            <button data-zoom="0">Reset (100%)</button>
+            <button data-zoom="1">+ Zoom In</button>
+            <button data-zoom="fit">Fit to Screen</button>
+        </div>
+        <button class="mermaid-modal-close" id="mermaid-modal-close">✕ Close (Esc)</button>
+    </div>
+    <div class="mermaid-modal-body" id="mermaid-modal-body">
+        <div class="mermaid-modal-content" id="mermaid-modal-content"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script><script type="module">
+import { initMermaidPage } from '\/ts\/mermaid.js';
+initMermaidPage({"darkTheme":"dark","darkThemeVariables":{},"htmlLabels":true,"lightTheme":"default","lightThemeVariables":{},"look":"classic","securityLevel":"strict","transparentBackground":false});
+</script>
+
+            </main>
+        </div>
+        
+<script type="text/javascript" src="/ts/main.6c41968bbd41e2121913983fb4f3e0b5a06fee57e07d36a5c65adf9c17266350.js" defer></script>
+
+
+    </body>
+</html>

@@ -205,4 +205,4 @@ graph LR
 
 > การ Replay events และ Event store เรื่องนี้เกี่ยวกับ Event Sourcing ซึ่งจะเป็นบทที่ 6
 
-{{< page-nav prev-link="../03-saga/" next-link="../04-query/">}}
+{{< page-nav prev-link="../03-saga/" next-link="../05-ddd/">}}

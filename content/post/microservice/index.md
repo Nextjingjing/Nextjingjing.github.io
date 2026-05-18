@@ -31,4 +31,6 @@ Microservice คือสถาปัตยกรรมที่แบ่งร�
 
 [บทที่ 6: Event sourcing ](../../blogs/microservice/06-event-sourcing/)
 
+[บทที่ 7: API Gateway ](../../blogs/microservice/07-api-gateway/)
+
 {{< page-nav prev-link="/../" next-link="../../blogs/microservice/01-introduction/">}}
