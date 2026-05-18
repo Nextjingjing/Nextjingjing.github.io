@@ -8,6 +8,7 @@
 &lt;p&gt;&lt;a class="link" href="../../blogs/microservice/04-query/" &gt;บทที่ 4: การจัดการกับ Query&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a class="link" href="../../blogs/microservice/05-ddd/" &gt;บทที่ 5: การออกแบบ Business logic และ Service ด้วย Domain Driven Design &lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a class="link" href="../../blogs/microservice/06-event-sourcing/" &gt;บทที่ 6: Event sourcing &lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a class="link" href="../../blogs/microservice/07-api-gateway/" &gt;บทที่ 7: API Gateway &lt;/a&gt;&lt;/p&gt;
 &lt;div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;"&gt;
  &lt;div&gt;
  

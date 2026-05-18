@@ -1,4 +1,368 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Backend on Nextjingjing</title><link>https://Nextjingjing.github.io/tags/backend/</link><description>Recent content in Backend on Nextjingjing</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 22 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Nextjingjing.github.io/tags/backend/index.xml" rel="self" type="application/rss+xml"/><item><title>Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</title><link>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</link><pubDate>Wed, 22 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</guid><description>&lt;h1 id="event-sourcing"&gt;Event sourcing
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Backend on Nextjingjing</title><link>https://Nextjingjing.github.io/tags/backend/</link><description>Recent content in Backend on Nextjingjing</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 29 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://Nextjingjing.github.io/tags/backend/index.xml" rel="self" type="application/rss+xml"/><item><title>Microservice ตอนที่ 7 API Gateway</title><link>https://Nextjingjing.github.io/blogs/microservice/07-api-gateway/</link><pubDate>Wed, 29 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/07-api-gateway/</guid><description>&lt;h1 id="api-gateway"&gt;API Gateway
+&lt;/h1&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;มีข้อเสียหากเราให้ Client สื่อสารโดยตรงกับ Service อยู่มากมาย ดังนั้นเรามาดูวิธีแก้ไขมันกัน&lt;/p&gt;
+&lt;p&gt;ปล. Client ในที่นี้คือ Browser App, Mobile App, Desktop App, &amp;hellip;&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h2 id="รปแบบการสอสารของ-client"&gt;รูปแบบการสื่อสารของ Client
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;สื่อสารกับ Service โดยตรง&lt;/li&gt;
+&lt;li&gt;การสื่อสารโดยมีตัวกลาง
+&lt;ul&gt;
+&lt;li&gt;API gateway&lt;/li&gt;
+&lt;li&gt;Backend For Frontend (BFF)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="ประเดนอนๆ"&gt;ประเด็นอื่นๆ
+&lt;/h2&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;แต่ละ Client มีความต้องการที่ไม่เหมือนกัน เช่น Mobile app, Browser app ต่างก็มีความต้องการชุดข้อมูลไม่เหมือนกัน เป็นต้น ทำให้ยากที่จะทำ 1 API Composition ที่ Fit-in กับทุกๆ Client&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;p&gt;ดังนั้นบางครั้งเราจึงทำ API Composition (บทที่ 4) แยกกันแต่ละประเภทของ Client ด้วย
+เช่น อาจจะมี Mobile API, Browser API โดยเฉพาะแยกตามความต้องการเดี๋ยวเราจะรู้แนวคิดนี้กันอีกที&lt;/p&gt;
+&lt;h2 id="สอสารกบ-service-โดยตรง"&gt;สื่อสารกับ Service โดยตรง
+&lt;/h2&gt;&lt;h4 id="ขอด"&gt;ข้อดี
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;ง่ายไม่ซับซ้อน&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="ขอเสย"&gt;ข้อเสีย
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;หากต้องการให้หลายๆ ข้อมูลที่กระจายไปทั่วๆ Service แล้วจำเป็นต้องส่งหลายๆ Request
+&lt;ul&gt;
+&lt;li&gt;หากผู้ใช้เน็ตกากจะทำให้เขาหงุดหงิดรอ&lt;/li&gt;
+&lt;li&gt;หากผู้ใช้มาจากมือถือจะเปลืองแบต&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;ขาดการ Encapsulation เช่น หาก Service มีการเปลี่ยนแปลงแค่ 1 Service ต้องแก้ทุกๆ Client&lt;/li&gt;
+&lt;li&gt;หากใช้ IPC ที่ไม่เป็นมิตรกับ Client อาจทำให้การสื่อสารลำบากขึ้น
+&lt;ul&gt;
+&lt;li&gt;เช่น หาก Service ที่เราใช้ gRPC แต่ Client มาจาก Web app จะทำไง&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="api-gateway-1"&gt;API Gateway
+&lt;/h2&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;
+&lt;p&gt;API Gateway เป็นจุดแรกที่ Client จากภายนอกเข้ามาใน Microservice&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;graph LR
+ subgraph Clients
+ C1[📱 Mobile App]
+ C2[💻 Web Browser]
+ end
+
+ subgraph "API Management Layer"
+ GW{{"🛡️ API Gateway"}}
+ end
+
+ subgraph "Microservices Cluster"
+ S1[📦 Product Service]
+ S2[🛒 Order Service]
+ S3[👤 User Service]
+ S4[💳 Payment Service]
+ end
+
+ %% Connections
+ C1 --&gt; GW
+ C2 --&gt; GW
+
+ GW -- "/products" --&gt; S1
+ GW -- "/orders" --&gt; S2
+ GW -- "/users" --&gt; S3
+ GW -- "/pay" --&gt; S4
+
+ %% Styling
+ style GW fill:#f96,stroke:#333,stroke-width:2px
+ style S1 fill:#bbf
+ style S2 fill:#bbf
+ style S3 fill:#bbf
+ style S4 fill:#bbf&lt;/pre&gt;&lt;h3 id="ลกษณะ"&gt;ลักษณะ
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;เป็นจุดแรกที่ Client เข้ามา&lt;/li&gt;
+&lt;li&gt;Request routing เป็นคนนำพาไปส่งหา Service ต่างๆ&lt;/li&gt;
+&lt;li&gt;API composition เช่น การ Query มันจะรวบรวมข้อมูลที่กระจายไปทั่ว Service ต่างๆให้&lt;/li&gt;
+&lt;li&gt;เป็นตัวแปล Protocol เช่น Service A ใช้ gRPC ดังนั้น Client จาก Browser app ที่ใช้ HTTPs สามารถคุยกับ Service A ได้เพราะมีคนแปลให้&lt;/li&gt;
+&lt;li&gt;มี API layer เพื่อแยก API ให้แต่ละ Client เช่น Mobile app, Browser app, &amp;hellip;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;(ทางเลือก/ไม่จำเป็น)&lt;/strong&gt; มี Function ต่างๆ ได้
+&lt;ul&gt;
+&lt;li&gt;Authentication/Authorization ยืนยันตัวตน&lt;/li&gt;
+&lt;li&gt;Rate limiting กันคนยิง Request รัวๆ&lt;/li&gt;
+&lt;li&gt;Caching&lt;/li&gt;
+&lt;li&gt;Monitoring&lt;/li&gt;
+&lt;li&gt;Request logging&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;จริงๆ เราสามารถทำ Function (Authentication/Authorization, Rate limiting, Caching, &amp;hellip;) ได้สามรูปแบบคือ&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;ทำที่ Service ไปเลย (แต่จะดูแปลกๆ เพราะจริงๆ เราควรยืนยันตัวตนที่หน้าบ้านไม่ใช่ในบ้าน)&lt;/li&gt;
+&lt;li&gt;ทำ Service พิเศษไปอยู่หน้า API gateway (ข้อเสียคือเพิ่ม Latency เพราะต้องไปที่ service พิเศษ 🡆 API Gateway 🡆 Service เบื้องหลังต่างๆ แต่ข้อดีคือ หากมีหลายๆ Gateway จะทำให้มี Logic อยู่ที่เดียวกันนั้นเอง)&lt;/li&gt;
+&lt;li&gt;ทำใน API Gateway ไปเลย (ข้อดีคือ ไม่มี Latency ข้อเสียคือหากมีหลายๆ Gateway จะมี Logic กระจายไปทั่ว)&lt;/li&gt;
+&lt;/ol&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="สถาปตยกรรม-api-gateway"&gt;สถาปัตยกรรม API Gateway
+&lt;/h3&gt;&lt;pre class="mermaid" style="visibility:hidden"&gt;graph TD
+ %% Client Layer
+ subgraph Clients [External Clients]
+ Mobile[Mobile client]
+ Browser[Browser JavaScript application]
+ ThirdParty[3rd-party application]
+ end
+
+ %% API Gateway Layer
+ subgraph APIGateway [API Gateway]
+ subgraph APILayer [API Layer]
+ MobileAPI[Mobile API]
+ BrowserAPI[Browser API]
+ PublicAPI[Public API]
+ end
+
+ CommonLayer[Common layer &lt;br/&gt;&lt;i&gt;Authentication, Rate Limiting, Logging, etc.&lt;/i&gt;]
+ end
+
+ %% Relationships
+ Mobile --&gt; MobileAPI
+ Browser --&gt; BrowserAPI
+ ThirdParty --&gt; PublicAPI
+
+ MobileAPI --&gt; CommonLayer
+ BrowserAPI --&gt; CommonLayer
+ PublicAPI --&gt; CommonLayer
+
+ %% Styling
+ style Mobile fill:#fff2cc,stroke:#d6b656
+ style Browser fill:#fff2cc,stroke:#d6b656
+ style ThirdParty fill:#fff2cc,stroke:#d6b656
+ 
+ style APIGateway fill:#d5e8d4,stroke:#82b366
+ style APILayer fill:#fff,stroke:#000
+ style CommonLayer fill:#fff,stroke:#000
+ 
+ style MobileAPI fill:#d5e8d4,stroke:#82b366
+ style BrowserAPI fill:#d5e8d4,stroke:#82b366
+ style PublicAPI fill:#d5e8d4,stroke:#82b366&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;API layer&lt;/strong&gt; ใช้แยกแต่ละประเภทของผู้ใช้ เช่น Mobile client, Browser JavaScript application, 3rd-party application&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Common layer&lt;/strong&gt; เป็นชั้นที่ทำ Function พิเศษต่างๆ Authentication, Rate Limiting, Logging, &amp;hellip;&lt;/li&gt;
+&lt;li&gt;Client 🡆 API gateway 🡆 Service ต่างๆ&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ประเดนอนๆ-1"&gt;ประเด็นอื่นๆ
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;การมี API Gateway เพียงแค่ 1 อัน ก็มีข้อเสียอยู่ได้แก่
+&lt;ul&gt;
+&lt;li&gt;ขาดความ Autonomy (ความเป็นอิสระของทีม) เช่น หากทีม Mobile อยากให้ API Gateway เป็นอย่างนั้น แต่ทีม Browser อยากให้เป็นอย่างโน้น ทำให้ความต้องการของแต่ละทีมไม่มีอิสระของตนเอง&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="backend-for-frontend"&gt;Backend For Frontend
+&lt;/h3&gt;
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;Important Note&lt;/strong&gt; 📝:&lt;/p&gt;
+&lt;p&gt;Backend For Frontend Pattern คือการมีหลายๆ API Gateway ตามประเภทของ Client เพื่อให้เกิดความ Autonomy (ความเป็นอิสระของทีม)&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;pre class="mermaid" style="visibility:hidden"&gt;graph TD
+ %% Teams
+ subgraph MobileTeam ["Mobile client team"]
+ M_User(( ))
+ end
+
+ subgraph BrowserTeam ["Browser client team"]
+ B_User(( ))
+ end
+
+ subgraph PublicTeam ["Public API team"]
+ P_User(( ))
+ end
+
+ %% Applications
+ MobileApp[Mobile client]
+ BrowserApp[Browser JavaScript application]
+ ThirdPartyApp[3rd-party application]
+
+ %% Connections Teams to Apps &amp; Gateways
+ M_User -.-&gt; MobileApp
+ M_User -. "Owns" .-&gt; MobileAPI
+ 
+ B_User -.-&gt; BrowserApp
+ B_User -. "Owns" .-&gt; BrowserAPI
+ 
+ P_User -.-&gt; ThirdPartyApp
+ P_User -. "Owns" .-&gt; PublicAPI
+
+ %% Mobile Gateway
+ subgraph MobileGateway [Mobile API gateway]
+ direction TB
+ subgraph MobileAPILayer [API layer]
+ MobileAPI[Mobile API]
+ end
+ MobileCommon[Common layer]
+ MobileAPI --&gt; MobileCommon
+ end
+
+ %% Browser Gateway
+ subgraph BrowserGateway [Browser API gateway]
+ direction TB
+ subgraph BrowserAPILayer [API layer]
+ BrowserAPI[Browser API]
+ end
+ BrowserCommon[Common layer]
+ BrowserAPI --&gt; BrowserCommon
+ end
+
+ %% Public Gateway
+ subgraph PublicGateway [Public API gateway]
+ direction TB
+ subgraph PublicAPILayer [API layer]
+ PublicAPI[Public API]
+ end
+ PublicCommon[Common layer]
+ PublicAPI --&gt; PublicCommon
+ end
+
+ %% Flow from Apps to Gateways
+ MobileApp --&gt; MobileAPI
+ BrowserApp --&gt; BrowserAPI
+ ThirdPartyApp --&gt; PublicAPI
+
+ %% Styling
+ style MobileGateway fill:#c1e1c1,stroke:#333
+ style BrowserGateway fill:#c1e1c1,stroke:#333
+ style PublicGateway fill:#c1e1c1,stroke:#333
+ style MobileAPI fill:#b8daba,stroke:#333
+ style BrowserAPI fill:#b8daba,stroke:#333
+ style PublicAPI fill:#b8daba,stroke:#333
+ style BrowserApp fill:#ffffa0,stroke:#333
+ style ThirdPartyApp fill:#ffffa0,stroke:#333&lt;/pre&gt;&lt;ul&gt;
+&lt;li&gt;จะเห็นว่าแต่ละทีม Dev สามารถมีอิสระให้กับ API Gateway ของตนเอง ทำให้มี Autonomy (ความเป็นอิสระของทีม) เปลี่ยนแปลงอะไรก็ได้ตามใจทีมตนเอง
+&lt;ul&gt;
+&lt;li&gt;เช่น สามารถเปลี่ยน &lt;strong&gt;Common layer&lt;/strong&gt; ได้ตามใจทีมตนเอง เพื่อให้เหมาะสมกับ API ของตนเอง&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;&lt;strong&gt;คำแนะนำ&lt;/strong&gt;:&lt;/p&gt;
+&lt;p&gt;เราควรใช้ API Gateway เป็นตัวเลือกแรก เพราะ BFF นั้นทำให้ระบบซับซ้อนมากขึ้น และใช้ BFF เมื่อแต่ละทีมมีความต้องการ Gateway ไม่เหมือนกันเท่านั้น&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="ขอด-1"&gt;ข้อดี
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Encapsulation ซ่อนความซับซ้อนของ Services ทำให้เวลามีการเปลี่ยนแปลง Services ต่างๆ จะไม่ส่งผลกระทบกับ Client มากนัก&lt;/li&gt;
+&lt;li&gt;มอบ API สำหรับ Client โดยเฉพาะ เช่น แยก Browser API, Mobile API, &amp;hellip;&lt;/li&gt;
+&lt;li&gt;เป็นทางเข้าแรก ทำให้ Function พิเศษได้ เช่น Authentication, &amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ขอเสย-1"&gt;ข้อเสีย
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;ถ้า API gateway ช้า จะทำให้ทั้งระบบช้า เพราะเป็นคอขวด&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ประเดนอนๆ-2"&gt;ประเด็นอื่นๆ
+&lt;/h3&gt;&lt;h4 id="scalability-และ-performance"&gt;Scalability และ Performance
+&lt;/h4&gt;&lt;p&gt;API Gate way สามารถทำ I/O ได้สองรูปแบบคือ&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Synchronous I/O (Blocking)
+&lt;ul&gt;
+&lt;li&gt;1 Request = 1 Thread&lt;/li&gt;
+&lt;li&gt;ข้อดี: เขียนโปรแกรมง่าย ตรงไปตรงมา&lt;/li&gt;
+&lt;li&gt;ข้อเสีย: สิ้นเปลืองทรัพยากร&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Asynchronous I/O (Non-blocking)
+&lt;ul&gt;
+&lt;li&gt;จัดการ Thread ได้ดีกว่า&lt;/li&gt;
+&lt;li&gt;ข้อดี: ไม่สิ้นเปลืองทรัพยากร&lt;/li&gt;
+&lt;li&gt;ข้อเสีย: เขียนโปรแกรมยาก แก้บั๊กยาก&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="การรบมอ-error"&gt;การรับมือ Error
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;ถ้าทำ API Composition ควรจะทำ Circuit breaker แบบบทที่ 2&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="ทำ-discovery"&gt;ทำ Discovery
+&lt;/h4&gt;&lt;p&gt;หากมีการใช้ Synchronous remote procedure invocation บทที่ 2 ควรจะทำ Discovery Service&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Client-Side Discovery&lt;/li&gt;
+&lt;li&gt;Server-Side Discovery&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="การ-implement-api-gateway"&gt;การ Implement API gateway
+&lt;/h2&gt;&lt;h3 id="สงทตองทำ"&gt;สิ่งที่ต้องทำ
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;Request routing พาไปหา Service ที่ต้องการ&lt;/li&gt;
+&lt;li&gt;API composition รวบรวมคำตอบของแต่ละ Service และรวม&lt;/li&gt;
+&lt;li&gt;(Optional) Function พิเศษ เช่น Authentication, Logging, &amp;hellip;&lt;/li&gt;
+&lt;li&gt;(Optional) Protocol translation หากมีการใช้ Protocol ที่ Client ใช้งานได้ยาก&lt;/li&gt;
+&lt;li&gt;(Optional) Discovery Service&lt;/li&gt;
+&lt;/ol&gt;
+
+ &lt;blockquote&gt;
+ &lt;p&gt;จะเห็นว่าสิ่งที่ต้องทำเยอะมาก&lt;/p&gt;
+
+ &lt;/blockquote&gt;
+&lt;h3 id="ใช-off-shelf-api-gateway-สำเรจรป"&gt;ใช้ Off-shelf API Gateway สำเร็จรูป
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;ข้อดี: ง่าย แค่ตั้งค่าให้ถูก มี&lt;/li&gt;
+&lt;li&gt;ข้อเสีย: ไม่ยืดหยุ่นเพราะต้องใช้ตามที่เขามีมาให้&lt;/li&gt;
+&lt;li&gt;เช่น AWS Gateway, Kong, &amp;hellip;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="ใชของททำเอง"&gt;ใช้ของที่ทำเอง
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;ข้อดี: ยืดหยุ่นสูง ทุกอย่างเรากำหนด&lt;/li&gt;
+&lt;li&gt;ข้อเสีย: เริ่มได้ช้า ต้องทำทุกอย่างเอง&lt;/li&gt;
+&lt;li&gt;เช่น Spring Cloud Gateway, Node.js (Express / Fastify), Go (Gin / Echo), GraphQL&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="graphql"&gt;GraphQL
+&lt;/h2&gt;&lt;p&gt;&lt;img alt="GraphQL Icon" class="gallery-image" data-flex-basis="240px" data-flex-grow="100" height="600" loading="lazy" sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src="https://Nextjingjing.github.io/blogs/microservice/07-api-gateway/graphql-1732132118455.png" width="600"&gt;&lt;/p&gt;
+&lt;p&gt;หัวข้อสุดท้ายบางคร้ังเรามี Clients หลายๆ ประเภทมันคงยากมากๆ ที่จะทำ 1 API ให้ Fit กับทุกๆ Clients ได้ เช่น Mobile Client อาจจะมีความต้องการ Fields ของข้อมูลที่น้อยกว่า เป็นต้น&lt;/p&gt;
+&lt;p&gt;ปัญหาดังกล่าวสามารถแก้ได้โดย &lt;strong&gt;GraphQL&lt;/strong&gt; ทีนี้อยากให้สังเกตที่คำว่า &lt;strong&gt;&amp;ldquo;QL&amp;rdquo;&lt;/strong&gt; มาจาก Query language นั้นเอง ดังนั้นเจ้าตัวนี้จึงมีความสามารถให้แต่ละ Client เลือก field ข้อมูลที่สนใจเองได้เลย โดยไม่ต้องแยก API ตามแต่ละ Client เหมือนหัวข้อก่อนๆ&lt;/p&gt;
+&lt;p&gt;เช่น Mobile Client อาจจะเรียกแบบนี้&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-graphql" data-lang="graphql"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;query&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nc"&gt;user&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="py"&gt;id&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#34;123&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nc"&gt;name&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="py"&gt;avatarUrl&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;ขอ User แค่ 2 fields ได้แก่&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;name&lt;/li&gt;
+&lt;li&gt;avatarUrl&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;"&gt;
+ &lt;div&gt;
+ 
+ &lt;a href="./06-event-sourcing/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;"&gt;
+ ← หน้าก่อนหน้า
+ &lt;/a&gt;
+ 
+ &lt;/div&gt;
+
+ &lt;div&gt;
+ 
+ &lt;a href="https://Nextjingjing.github.io/post/microservice/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;"&gt;
+ ตอนถัดไป →
+ &lt;/a&gt;
+ 
+ &lt;/div&gt;
+&lt;/div&gt;</description></item><item><title>Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</title><link>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</link><pubDate>Wed, 22 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/06-event-sourcing/</guid><description>&lt;h1 id="event-sourcing"&gt;Event sourcing
 &lt;/h1&gt;
  &lt;blockquote&gt;
  &lt;p&gt;โดยปกติแล้วการบันทึกข้อมูลลงฐานข้อมูลนั้นเราจะบันทึกแค่ค่าปัจจุบันของ Record นั้นๆ แต่ปัญหาที่ตามมาคือเราจะไม่เห็นประวัติเก่าของ Record นั้นๆ ดังนั้น Event sourcing จึงมาแก้ปัญหาดังกล่าว&lt;/p&gt;
@@ -374,7 +738,24 @@
 &lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;Event Sourcing ทำให้ Query ยาก เลยต้องนำ CQRS มาช่วย&lt;/li&gt;
 &lt;li&gt;Event store ตอบโจทย์ CQRS เนื่องจากการ Replay Event เป็นอีกหนึ่งบทบาทที่ทำให้ CQRS ยืดหยุ่นมาก เพราะทำให้ Scaling จำนวนเครื่อง Read, เปลี่ยน Database, ป้องกันความผิดพลาด&lt;/li&gt;
-&lt;/ul&gt;</description></item><item><title>Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</title><link>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</link><pubDate>Sat, 18 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</guid><description>&lt;h1 id="domain-driven-design"&gt;Domain Driven Design
+&lt;/ul&gt;
+&lt;div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;"&gt;
+ &lt;div&gt;
+ 
+ &lt;a href="../05-ddd/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;"&gt;
+ ← หน้าก่อนหน้า
+ &lt;/a&gt;
+ 
+ &lt;/div&gt;
+
+ &lt;div&gt;
+ 
+ &lt;a href="../07-api-gateway/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;"&gt;
+ ตอนถัดไป →
+ &lt;/a&gt;
+ 
+ &lt;/div&gt;
+&lt;/div&gt;</description></item><item><title>Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</title><link>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</link><pubDate>Sat, 18 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/05-ddd/</guid><description>&lt;h1 id="domain-driven-design"&gt;Domain Driven Design
 &lt;/h1&gt;
  &lt;blockquote&gt;
  &lt;p&gt;Domain Driven Design เป็นศาสตร์ที่ช่วยในการออกแบบ Business logic และช่วยหาว่าเราต้องมี Service อะไรบ้างใน Microservices&lt;/p&gt;
@@ -1295,7 +1676,24 @@
 &lt;ol start="2"&gt;
 &lt;li&gt;&lt;strong&gt;Common Closure Principle - CCP&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;หากมีกลุ่ม Services ไหนต้องมีการเปลี่ยงแปลงตามธุรกิจที่เปลี่ยนไปตามกาลเวลา พร้อมกันและเหตุผลในการเปลี่ยนเดียวกัน ควรจับมาอยู่ใน Service เดียวกัน&lt;/p&gt;</description></item><item><title>Microservice ตอนที่ 4 Queries in Microservice</title><link>https://Nextjingjing.github.io/blogs/microservice/04-query/</link><pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/04-query/</guid><description>&lt;h1 id="การทำ-query-ใน-microservice"&gt;การทำ Query ใน Microservice
+&lt;p&gt;หากมีกลุ่ม Services ไหนต้องมีการเปลี่ยงแปลงตามธุรกิจที่เปลี่ยนไปตามกาลเวลา พร้อมกันและเหตุผลในการเปลี่ยนเดียวกัน ควรจับมาอยู่ใน Service เดียวกัน&lt;/p&gt;
+&lt;div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;"&gt;
+ &lt;div&gt;
+ 
+ &lt;a href="../04-query/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;"&gt;
+ ← หน้าก่อนหน้า
+ &lt;/a&gt;
+ 
+ &lt;/div&gt;
+
+ &lt;div&gt;
+ 
+ &lt;a href="../06-event-sourcing/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;"&gt;
+ ตอนถัดไป →
+ &lt;/a&gt;
+ 
+ &lt;/div&gt;
+&lt;/div&gt;</description></item><item><title>Microservice ตอนที่ 4 Queries in Microservice</title><link>https://Nextjingjing.github.io/blogs/microservice/04-query/</link><pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate><guid>https://Nextjingjing.github.io/blogs/microservice/04-query/</guid><description>&lt;h1 id="การทำ-query-ใน-microservice"&gt;การทำ Query ใน Microservice
 &lt;/h1&gt;
  &lt;blockquote&gt;
  &lt;p&gt;การ Query เพื่อขออ่านจากหลายๆ Databases เป็นเรื่องที่ท้าทายกว่า Monolith เพราะแต่ละ Service ใน Microservice นั้นต่างก็มี Database เป็นของตนเอง&lt;/p&gt;
@@ -1568,7 +1966,7 @@
 
  &lt;div&gt;
  
- &lt;a href="../04-query/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;"&gt;
+ &lt;a href="../05-ddd/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;"&gt;
  ตอนถัดไป →
  &lt;/a&gt;
  
@@ -2522,6 +2920,7 @@
 &lt;p&gt;&lt;a class="link" href="../../blogs/microservice/04-query/" &gt;บทที่ 4: การจัดการกับ Query&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a class="link" href="../../blogs/microservice/05-ddd/" &gt;บทที่ 5: การออกแบบ Business logic และ Service ด้วย Domain Driven Design &lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a class="link" href="../../blogs/microservice/06-event-sourcing/" &gt;บทที่ 6: Event sourcing &lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a class="link" href="../../blogs/microservice/07-api-gateway/" &gt;บทที่ 7: API Gateway &lt;/a&gt;&lt;/p&gt;
 &lt;div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;"&gt;
  &lt;div&gt;
  
