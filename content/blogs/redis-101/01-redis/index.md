@@ -36,7 +36,7 @@ book: {
     author: 'Brandon Sanderson'
 }
 ```
-- List เป็นคล้ายๆ Array แต่ซ้ำได้ มีลำดับไม่เหมือน Sets เช่น `names: ['mario', 'luigi', 'mario']`
+- List เป็นคล้ายๆ Array แต่ซ้ำได้ มีลำดับแน่นอน ไม่เหมือน Sets เช่น `names: ['mario', 'luigi', 'mario']`
 - Stream เก็บ Event เป็นรายการต่อท้าย โดยแต่ละรายการมี ID และข้อมูลแบบ Field-value เช่น เหตุการณ์สร้างและชำระเงินของ Order
 
 ```text
@@ -62,4 +62,4 @@ orders:
 
 การรองรับแต่ละชนิดขึ้นอยู่กับเวอร์ชันและส่วนเสริมที่ติดตั้ง ดูรายละเอียดเพิ่มเติมได้ที่ [Redis Data types](https://redis.io/docs/latest/develop/data-types/)
 
-{{< page-nav prev-link="/post/redis-101/" next-link="/post/redis-101/" >}}
+{{< page-nav prev-link="/post/redis-101/" next-link="/blogs/redis-101/02-basic-command/" >}}

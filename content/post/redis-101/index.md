@@ -17,6 +17,7 @@ toc: true
 ## สารบัญ
 
 - [บทที่ 1: Redis คืออะไร](/blogs/redis-101/01-redis/)
+- [บทที่ 2: Basic command](/blogs/redis-101/02-basic-command/)
 <!-- blog-manager:toc:end -->
 
 {{< page-nav prev-link="/" next-link="/blogs/redis-101/01-redis/" >}}
