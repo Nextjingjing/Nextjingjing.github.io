@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
 
 
-<link rel="stylesheet" href="/scss/style.min.4df4c8522cc0ad28c20cdfcea7f6cfa3a509d0c92276499cf4ceb49306afe6a1.css"><meta property='og:title' content="Microservice ตอนที่ 3 saga pattern">
+<link rel="stylesheet" href="/scss/style.min.21ff10e2ccd84e3cbee232de0fc8bd82aad9270fd957210bb966b6c6bb8d64c6.css"><meta property='og:title' content="Microservice ตอนที่ 3 saga pattern">
 <meta property='og:description' content="Microservice ตอนที่ 3 การจัดการกับ Transaction ด้วย saga pattern">
 <meta property='og:url' content='http://localhost:1313/blogs/microservice/03-saga/'>
 <meta property='og:site_name' content='Nextjingjing'>
@@ -599,94 +599,94 @@
 <li>เช่น จากตารางจะเห็นได้ว่า <code>verifyConsumerDetails()</code> ไม่ต้อง Compensating transaction เพราะตัวเองเป็น Read-Only</li>
 </ul>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th style="text-align: left">State</th>
-          <th style="text-align: left">Service</th>
-          <th style="text-align: left">Transaction</th>
-          <th style="text-align: left">Compensating transaction</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td style="text-align: left"><strong>Commit</strong></td>
-          <td style="text-align: left">Order Service</td>
-          <td style="text-align: left">createOrder()</td>
-          <td style="text-align: left">rejectOrder()</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>Commit</strong></td>
-          <td style="text-align: left">Consumer Service</td>
-          <td style="text-align: left">verifyConsumerDetails()</td>
-          <td style="text-align: left">—</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>Commit</strong></td>
-          <td style="text-align: left">Kitchen Service</td>
-          <td style="text-align: left">createTicket()</td>
-          <td style="text-align: left">rejectTicket()</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>Failure</strong></td>
-          <td style="text-align: left">Accounting Service</td>
-          <td style="text-align: left">authorizeCreditCard()</td>
-          <td style="text-align: left">—</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>-</strong></td>
-          <td style="text-align: left">Kitchen Service</td>
-          <td style="text-align: left"><del>approveTicket()</del></td>
-          <td style="text-align: left">—</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>-</strong></td>
-          <td style="text-align: left">Order Service</td>
-          <td style="text-align: left"><del>approveOrder()</del></td>
-          <td style="text-align: left">—</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th style="text-align: left">State</th>
+					<th style="text-align: left">Service</th>
+					<th style="text-align: left">Transaction</th>
+					<th style="text-align: left">Compensating transaction</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>Commit</strong></td>
+					<td style="text-align: left">Order Service</td>
+					<td style="text-align: left">createOrder()</td>
+					<td style="text-align: left">rejectOrder()</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Commit</strong></td>
+					<td style="text-align: left">Consumer Service</td>
+					<td style="text-align: left">verifyConsumerDetails()</td>
+					<td style="text-align: left">—</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Commit</strong></td>
+					<td style="text-align: left">Kitchen Service</td>
+					<td style="text-align: left">createTicket()</td>
+					<td style="text-align: left">rejectTicket()</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Failure</strong></td>
+					<td style="text-align: left">Accounting Service</td>
+					<td style="text-align: left">authorizeCreditCard()</td>
+					<td style="text-align: left">—</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>-</strong></td>
+					<td style="text-align: left">Kitchen Service</td>
+					<td style="text-align: left"><del>approveTicket()</del></td>
+					<td style="text-align: left">—</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>-</strong></td>
+					<td style="text-align: left">Order Service</td>
+					<td style="text-align: left"><del>approveOrder()</del></td>
+					<td style="text-align: left">—</td>
+			</tr>
+	</tbody>
 </table></div>
 <h2 id="โครงสรางของ-saga">โครงสร้างของ saga
 </h2><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th style="text-align: left">Type</th>
-          <th style="text-align: left">Service</th>
-          <th style="text-align: left">Transaction</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td style="text-align: left"><strong>Compensatable transactions</strong></td>
-          <td style="text-align: left">Order Service</td>
-          <td style="text-align: left">createOrder()</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>Compensatable transactions</strong></td>
-          <td style="text-align: left">Consumer Service</td>
-          <td style="text-align: left">verifyConsumerDetails()</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>Compensatable transactions</strong></td>
-          <td style="text-align: left">Kitchen Service</td>
-          <td style="text-align: left">createTicket()</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>Pivot transactions</strong></td>
-          <td style="text-align: left">Accounting Service</td>
-          <td style="text-align: left">authorizeCreditCard()</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>Retriable transactions</strong></td>
-          <td style="text-align: left">Kitchen Service</td>
-          <td style="text-align: left">approveTicket()</td>
-      </tr>
-      <tr>
-          <td style="text-align: left"><strong>Retriable transactions</strong></td>
-          <td style="text-align: left">Order Service</td>
-          <td style="text-align: left">approveOrder()</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th style="text-align: left">Type</th>
+					<th style="text-align: left">Service</th>
+					<th style="text-align: left">Transaction</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>Compensatable transactions</strong></td>
+					<td style="text-align: left">Order Service</td>
+					<td style="text-align: left">createOrder()</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Compensatable transactions</strong></td>
+					<td style="text-align: left">Consumer Service</td>
+					<td style="text-align: left">verifyConsumerDetails()</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Compensatable transactions</strong></td>
+					<td style="text-align: left">Kitchen Service</td>
+					<td style="text-align: left">createTicket()</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Pivot transactions</strong></td>
+					<td style="text-align: left">Accounting Service</td>
+					<td style="text-align: left">authorizeCreditCard()</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Retriable transactions</strong></td>
+					<td style="text-align: left">Kitchen Service</td>
+					<td style="text-align: left">approveTicket()</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Retriable transactions</strong></td>
+					<td style="text-align: left">Order Service</td>
+					<td style="text-align: left">approveOrder()</td>
+			</tr>
+	</tbody>
 </table></div>
 <ul>
 <li>Compensatable transactions คือ Transactions ทียอมให้เกิด Compensating ได้</li>
@@ -833,54 +833,54 @@
     <blockquote>
         <p>Order table</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>id</th>
-          <th>create_at</th>
-          <th>&hellip;</th>
-          <th>state</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>2026-01-01</td>
-          <td>&hellip;</td>
-          <td>APPROVAL_PENDING</td>
-      </tr>
-      <tr>
-          <td>2</td>
-          <td>2026-01-01</td>
-          <td>&hellip;</td>
-          <td>REVISION_PENDING</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>id</th>
+					<th>create_at</th>
+					<th>&hellip;</th>
+					<th>state</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>1</td>
+					<td>2026-01-01</td>
+					<td>&hellip;</td>
+					<td>APPROVAL_PENDING</td>
+			</tr>
+			<tr>
+					<td>2</td>
+					<td>2026-01-01</td>
+					<td>&hellip;</td>
+					<td>REVISION_PENDING</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>เมื่อ saga ทำงานสำเร็จเราจะตัด <code>_PENDING</code> ทิ้งไป (ในที่นี้ Order Service ต้องอัพเดตดังนี้)</p>
 <p>Order table</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>id</th>
-          <th>create_at</th>
-          <th>&hellip;</th>
-          <th>state</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>1</td>
-          <td>2026-01-01</td>
-          <td>&hellip;</td>
-          <td>APPROVAL</td>
-      </tr>
-      <tr>
-          <td>2</td>
-          <td>2026-01-01</td>
-          <td>&hellip;</td>
-          <td>REVISION</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>id</th>
+					<th>create_at</th>
+					<th>&hellip;</th>
+					<th>state</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>1</td>
+					<td>2026-01-01</td>
+					<td>&hellip;</td>
+					<td>APPROVAL</td>
+			</tr>
+			<tr>
+					<td>2</td>
+					<td>2026-01-01</td>
+					<td>&hellip;</td>
+					<td>REVISION</td>
+			</tr>
+	</tbody>
 </table></div>
 
     </blockquote>

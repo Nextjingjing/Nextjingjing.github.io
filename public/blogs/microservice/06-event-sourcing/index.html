@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
 
 
-<link rel="stylesheet" href="/scss/style.min.4df4c8522cc0ad28c20cdfcea7f6cfa3a509d0c92276499cf4ceb49306afe6a1.css"><meta property='og:title' content="Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing">
+<link rel="stylesheet" href="/scss/style.min.21ff10e2ccd84e3cbee232de0fc8bd82aad9270fd957210bb966b6c6bb8d64c6.css"><meta property='og:title' content="Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing">
 <meta property='og:description' content="Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing">
 <meta property='og:url' content='http://localhost:1313/blogs/microservice/06-event-sourcing/'>
 <meta property='og:site_name' content='Nextjingjing'>
@@ -436,75 +436,75 @@
 <li>State-oriented Persistence (การเก็บสถานะปัจจุบัน) เป็นแบบที่เราคุ้นเคยเลยเก็ยสถานะปัจจุบันของข้อมูล แต่ประวัติหายหมด</li>
 </ol>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th style="text-align: left">account_id</th>
-          <th style="text-align: left">customer_name</th>
-          <th style="text-align: left">balance</th>
-          <th style="text-align: left">last_updated</th>
-          <th style="text-align: left">status</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td style="text-align: left">ACC-001</td>
-          <td style="text-align: left">Somchai Dee</td>
-          <td style="text-align: left"><strong>850.00</strong></td>
-          <td style="text-align: left">2024-05-20 10:30:00</td>
-          <td style="text-align: left">Active</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">ACC-002</td>
-          <td style="text-align: left">Somsak Range</td>
-          <td style="text-align: left"><strong>1,200.00</strong></td>
-          <td style="text-align: left">2024-05-19 14:15:00</td>
-          <td style="text-align: left">Active</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th style="text-align: left">account_id</th>
+					<th style="text-align: left">customer_name</th>
+					<th style="text-align: left">balance</th>
+					<th style="text-align: left">last_updated</th>
+					<th style="text-align: left">status</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">ACC-001</td>
+					<td style="text-align: left">Somchai Dee</td>
+					<td style="text-align: left"><strong>850.00</strong></td>
+					<td style="text-align: left">2024-05-20 10:30:00</td>
+					<td style="text-align: left">Active</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">ACC-002</td>
+					<td style="text-align: left">Somsak Range</td>
+					<td style="text-align: left"><strong>1,200.00</strong></td>
+					<td style="text-align: left">2024-05-19 14:15:00</td>
+					<td style="text-align: left">Active</td>
+			</tr>
+	</tbody>
 </table></div>
 <ol start="2">
 <li>Event Sourcing (Event-oriented Persistence) เป็นแบบที่เน้นเก็บทุกสถานะของข้อมูลลงในฐานข้อมูล แล้วค่อยนำกลับมารวมกันคำนวณเป็นสถานะปัจจุบันแทน ซึ่งข้อดีคือประวัติยังอยู่</li>
 </ol>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th style="text-align: left">event_id</th>
-          <th style="text-align: left">account_id</th>
-          <th style="text-align: left">event_type</th>
-          <th style="text-align: left">amount</th>
-          <th style="text-align: left">timestamp</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td style="text-align: left">1</td>
-          <td style="text-align: left">ACC-001</td>
-          <td style="text-align: left"><strong>AccountOpened</strong></td>
-          <td style="text-align: left">0.00</td>
-          <td style="text-align: left">2024-05-20 09:00:00</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">2</td>
-          <td style="text-align: left">ACC-001</td>
-          <td style="text-align: left"><strong>MoneyDeposited</strong></td>
-          <td style="text-align: left">1000.00</td>
-          <td style="text-align: left">2024-05-20 09:15:00</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">3</td>
-          <td style="text-align: left">ACC-001</td>
-          <td style="text-align: left"><strong>MoneyWithdrawn</strong></td>
-          <td style="text-align: left">150.00</td>
-          <td style="text-align: left">2024-05-20 10:30:00</td>
-      </tr>
-      <tr>
-          <td style="text-align: left">4</td>
-          <td style="text-align: left">ACC-001</td>
-          <td style="text-align: left"><strong>MoneyWithdrawn</strong></td>
-          <td style="text-align: left">200.00</td>
-          <td style="text-align: left">2024-05-20 11:00:00</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th style="text-align: left">event_id</th>
+					<th style="text-align: left">account_id</th>
+					<th style="text-align: left">event_type</th>
+					<th style="text-align: left">amount</th>
+					<th style="text-align: left">timestamp</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">1</td>
+					<td style="text-align: left">ACC-001</td>
+					<td style="text-align: left"><strong>AccountOpened</strong></td>
+					<td style="text-align: left">0.00</td>
+					<td style="text-align: left">2024-05-20 09:00:00</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">2</td>
+					<td style="text-align: left">ACC-001</td>
+					<td style="text-align: left"><strong>MoneyDeposited</strong></td>
+					<td style="text-align: left">1000.00</td>
+					<td style="text-align: left">2024-05-20 09:15:00</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">3</td>
+					<td style="text-align: left">ACC-001</td>
+					<td style="text-align: left"><strong>MoneyWithdrawn</strong></td>
+					<td style="text-align: left">150.00</td>
+					<td style="text-align: left">2024-05-20 10:30:00</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">4</td>
+					<td style="text-align: left">ACC-001</td>
+					<td style="text-align: left"><strong>MoneyWithdrawn</strong></td>
+					<td style="text-align: left">200.00</td>
+					<td style="text-align: left">2024-05-20 11:00:00</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>ซึ่งสถานะปัจจุบันของ <code>ACC-001</code> คือ 0.00 + 1000.00 - 150.00 - 200.00 = <strong>650.00</strong></p>
 <h2 id="event-sourcing-1">Event sourcing
@@ -605,25 +605,25 @@
 <h5 id="ทางแกแบบงาย">ทางแก้แบบง่าย
 </h5><p>Polling การส่ง event ทุกๆ x วินาที แต่สร้าง Column พิเศษมาเช็ค PUBLISHED หาก = 0 ยังไม่ได้ส่ง หาก = 1 ส่งแล้ว</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>event_id</th>
-          <th>&hellip;</th>
-          <th>PUBLISHED</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>10</td>
-          <td>&hellip;</td>
-          <td>0</td>
-      </tr>
-      <tr>
-          <td>11</td>
-          <td>&hellip;</td>
-          <td>1</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>event_id</th>
+					<th>&hellip;</th>
+					<th>PUBLISHED</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>10</td>
+					<td>&hellip;</td>
+					<td>0</td>
+			</tr>
+			<tr>
+					<td>11</td>
+					<td>&hellip;</td>
+					<td>1</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>และ Query ให้หาตัวที่ PUBLISHED = 0</p>
 <div class="highlight"><div class="chroma">
@@ -677,104 +677,104 @@
 <p>โดยการทำ Snapshot คุณสามารถทำโดยการสร้าง <code>SNAPSHOTS Table</code> ขึ้นมา</p>
 <p><code>EVENTS Table</code></p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>event_id</th>
-          <th>entity_id</th>
-          <th>entity_type</th>
-          <th>event_type</th>
-          <th>event_data</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>&hellip;</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-      </tr>
-      <tr>
-          <td>7</td>
-          <td>3</td>
-          <td>Customer</td>
-          <td>CreditReserved</td>
-          <td>{&hellip;}</td>
-      </tr>
-      <tr>
-          <td>8</td>
-          <td>3</td>
-          <td>Customer</td>
-          <td>AddressChange</td>
-          <td>{&hellip;}</td>
-      </tr>
-      <tr>
-          <td>9</td>
-          <td>3</td>
-          <td>Customer</td>
-          <td>NameChange</td>
-          <td>{&hellip;}</td>
-      </tr>
-      <tr>
-          <td>10</td>
-          <td>3</td>
-          <td>Customer</td>
-          <td>&hellip;</td>
-          <td>{&hellip;}</td>
-      </tr>
-      <tr>
-          <td>11</td>
-          <td>3</td>
-          <td>Customer</td>
-          <td>&hellip;</td>
-          <td>{&hellip;}</td>
-      </tr>
-      <tr>
-          <td>12</td>
-          <td>3</td>
-          <td>Customer</td>
-          <td>&hellip;</td>
-          <td>{&hellip;}</td>
-      </tr>
-      <tr>
-          <td>&hellip;</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>event_id</th>
+					<th>entity_id</th>
+					<th>entity_type</th>
+					<th>event_type</th>
+					<th>event_data</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>&hellip;</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+			</tr>
+			<tr>
+					<td>7</td>
+					<td>3</td>
+					<td>Customer</td>
+					<td>CreditReserved</td>
+					<td>{&hellip;}</td>
+			</tr>
+			<tr>
+					<td>8</td>
+					<td>3</td>
+					<td>Customer</td>
+					<td>AddressChange</td>
+					<td>{&hellip;}</td>
+			</tr>
+			<tr>
+					<td>9</td>
+					<td>3</td>
+					<td>Customer</td>
+					<td>NameChange</td>
+					<td>{&hellip;}</td>
+			</tr>
+			<tr>
+					<td>10</td>
+					<td>3</td>
+					<td>Customer</td>
+					<td>&hellip;</td>
+					<td>{&hellip;}</td>
+			</tr>
+			<tr>
+					<td>11</td>
+					<td>3</td>
+					<td>Customer</td>
+					<td>&hellip;</td>
+					<td>{&hellip;}</td>
+			</tr>
+			<tr>
+					<td>12</td>
+					<td>3</td>
+					<td>Customer</td>
+					<td>&hellip;</td>
+					<td>{&hellip;}</td>
+			</tr>
+			<tr>
+					<td>&hellip;</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+			</tr>
+	</tbody>
 </table></div>
 <p><code>SNAPSHOTS Table</code></p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>event_id</th>
-          <th>entity_id</th>
-          <th>entity_type</th>
-          <th>snapshot_data</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>&hellip;</td>
-          <td></td>
-          <td></td>
-          <td></td>
-      </tr>
-      <tr>
-          <td>10</td>
-          <td>3</td>
-          <td>Customer</td>
-          <td>{&ldquo;name&rdquo;: &hellip;}</td>
-      </tr>
-      <tr>
-          <td>&hellip;</td>
-          <td></td>
-          <td></td>
-          <td></td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>event_id</th>
+					<th>entity_id</th>
+					<th>entity_type</th>
+					<th>snapshot_data</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>&hellip;</td>
+					<td></td>
+					<td></td>
+					<td></td>
+			</tr>
+			<tr>
+					<td>10</td>
+					<td>3</td>
+					<td>Customer</td>
+					<td>{&ldquo;name&rdquo;: &hellip;}</td>
+			</tr>
+			<tr>
+					<td>&hellip;</td>
+					<td></td>
+					<td></td>
+					<td></td>
+			</tr>
+	</tbody>
 </table></div>
 <p>เท่านี้เวลาคุณ Replay event ก็มาที่ Snapshot จะเห็นว่า N = 10 ดังนั้นคุณก็แค่ Replay 11, 12</p>
 <h2 id="การทำ-event-store">การทำ Event store
