@@ -319,4 +319,24 @@ book:1 -> {
 (integer) 1 # Exist 
 (integer) 0 # Non-exist
 ```
+
+### ข้อดี
+- เก็บข้อมูลที่เกี่ยวข้องกันไว้ใต้ Redis key เดียว เช่น ข้อมูลของหนังสือหนึ่งเล่ม
+- อ่านหรือแก้ไขเฉพาะ field ได้ ไม่ต้องเขียนข้อมูลทุก field ใหม่
+- เช็กว่ามี field หรือไม่ และอ่านหรือเขียน field เดียวได้รวดเร็ว
+
+### ข้อเสีย
+- field ใน Hash ไม่มีลำดับที่รับประกัน
+- การอ่าน field และ value ทั้งหมดต้องใช้เวลาตามจำนวน field ใน Hash
+- value เป็นข้อมูลแบบ string หากต้องเก็บข้อมูลซ้อนกัน ต้องแปลงเป็นรูปแบบข้อความ เช่น JSON เอง
+
+### Time complexity
+ให้ `N` คือจำนวน field/value ที่ระบุในคำสั่งหรือจำนวน field ใน Hash ตามที่อธิบายท้ายแต่ละรายการ
+- เพิ่มหรือแก้ไข field `HSET` — O(1) ต่อคู่ field/value; ถ้าส่งหลายคู่เป็น O(N)
+- อ่าน field เดียว `HGET` — O(1)
+- เช็ก field `HEXISTS` — O(1)
+- ลบ field `HDEL` — O(N) เมื่อสั่งลบ N fields
+- อ่านชื่อ field ทั้งหมด `HKEYS` — O(N) ตามจำนวน field ใน Hash
+- อ่าน field และ value ทั้งหมด `HGETALL` — O(N) ตามจำนวน field ใน Hash
+
 {{< page-nav prev-link="/blogs/redis-101/02-basic-command/" next-link="/post/redis-101/" >}}

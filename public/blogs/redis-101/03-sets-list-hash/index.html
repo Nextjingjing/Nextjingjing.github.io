@@ -304,6 +304,9 @@
         <li><a href="#hkeys">HKEYS</a></li>
         <li><a href="#hdel">HDEL</a></li>
         <li><a href="#hexists">HEXISTS</a></li>
+        <li><a href="#ขอด-2">ข้อดี</a></li>
+        <li><a href="#ขอเสย-2">ข้อเสีย</a></li>
+        <li><a href="#time-complexity-2">Time complexity</a></li>
       </ol>
     </li>
   </ol>
@@ -380,7 +383,7 @@
 
 
                     <time class="article-time--reading">
-                        4 minutes read
+                        5 minutes read
                     </time>
                 
             </div>
@@ -445,6 +448,9 @@
         <li><a href="#hkeys">HKEYS</a></li>
         <li><a href="#hdel">HDEL</a></li>
         <li><a href="#hexists">HEXISTS</a></li>
+        <li><a href="#ขอด-2">ข้อดี</a></li>
+        <li><a href="#ขอเสย-2">ข้อเสีย</a></li>
+        <li><a href="#time-complexity-2">Time complexity</a></li>
       </ol>
     </li>
   </ol>
@@ -1019,7 +1025,29 @@
 </span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">0</span> <span class="c1"># Non-exist</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;">
+</div><h3 id="ขอด-2">ข้อดี
+</h3><ul>
+<li>เก็บข้อมูลที่เกี่ยวข้องกันไว้ใต้ Redis key เดียว เช่น ข้อมูลของหนังสือหนึ่งเล่ม</li>
+<li>อ่านหรือแก้ไขเฉพาะ field ได้ ไม่ต้องเขียนข้อมูลทุก field ใหม่</li>
+<li>เช็กว่ามี field หรือไม่ และอ่านหรือเขียน field เดียวได้รวดเร็ว</li>
+</ul>
+<h3 id="ขอเสย-2">ข้อเสีย
+</h3><ul>
+<li>field ใน Hash ไม่มีลำดับที่รับประกัน</li>
+<li>การอ่าน field และ value ทั้งหมดต้องใช้เวลาตามจำนวน field ใน Hash</li>
+<li>value เป็นข้อมูลแบบ string หากต้องเก็บข้อมูลซ้อนกัน ต้องแปลงเป็นรูปแบบข้อความ เช่น JSON เอง</li>
+</ul>
+<h3 id="time-complexity-2">Time complexity
+</h3><p>ให้ <code>N</code> คือจำนวน field/value ที่ระบุในคำสั่งหรือจำนวน field ใน Hash ตามที่อธิบายท้ายแต่ละรายการ</p>
+<ul>
+<li>เพิ่มหรือแก้ไข field <code>HSET</code> — O(1) ต่อคู่ field/value; ถ้าส่งหลายคู่เป็น O(N)</li>
+<li>อ่าน field เดียว <code>HGET</code> — O(1)</li>
+<li>เช็ก field <code>HEXISTS</code> — O(1)</li>
+<li>ลบ field <code>HDEL</code> — O(N) เมื่อสั่งลบ N fields</li>
+<li>อ่านชื่อ field ทั้งหมด <code>HKEYS</code> — O(N) ตามจำนวน field ใน Hash</li>
+<li>อ่าน field และ value ทั้งหมด <code>HGETALL</code> — O(N) ตามจำนวน field ใน Hash</li>
+</ul>
+<div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;">
     <div>
         
         <a href="/blogs/redis-101/02-basic-command/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;">
