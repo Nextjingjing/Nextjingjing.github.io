@@ -26,24 +26,25 @@ flowchart LR
 
 ## Redis Data types
 อย่างที่บอกไปว่ามันเป็น Key-value structures ที่มี datatype ดังต่อไปนี้
-- Strings เช่น `name: 'mario'`
-- Sets ไม่มีลำดับ สมาชิกไม่ซ้ำ เช่น `names: {'mario', 'luigi', 'peach'}`
-- Sorted sets เรียงตาม score สมาชิกไม่ซ้ำ เช่น `scores: {'mario': 100, 'luigi': 80, 'peach': 120}` ใช้ทำ Leaderboard ได้
+- Strings เช่น `name -> 'mario'`
+- Sets ไม่มีลำดับ สมาชิกไม่ซ้ำ เช่น `names -> {'mario', 'luigi', 'peach'}`
+- Sorted sets เรียงตาม score สมาชิกไม่ซ้ำ เช่น `scores -> {'mario' -> 100, 'luigi' -> 80, 'peach' -> 120}` ใช้ทำ Leaderboard ได้
 - Hash เช่น
-```json
-book: {
-    title: 'final empire'
-    author: 'Brandon Sanderson'
+```text
+book -> {
+    title -> 'final empire'
+    author -> 'Brandon Sanderson'
 }
 ```
-- List เป็นคล้ายๆ Array แต่ซ้ำได้ มีลำดับแน่นอน ไม่เหมือน Sets เช่น `names: ['mario', 'luigi', 'mario']`
+- List เป็นคล้ายๆ Array แต่ซ้ำได้ มีลำดับแน่นอน ไม่เหมือน Sets เช่น `names -> ['mario', 'luigi', 'mario']`
 - Stream เก็บ Event เป็นรายการต่อท้าย โดยแต่ละรายการมี ID และข้อมูลแบบ Field-value เช่น เหตุการณ์สร้างและชำระเงินของ Order
 
 ```text
-orders:
-    1710000000000-0 -> {order_id: '101', status: 'created'}
-    1710000001000-0 -> {order_id: '101', status: 'paid'}
+orders ->
+    1710000000000-0 -> {order_id -> '101', status -> 'created'}
+    1710000001000-0 -> {order_id -> '101', status -> 'paid'}
 ```
+> จริงๆ ผมอยากจะบอกว่า team:a แบบนี้ก็ถือเป็น key นะครับ ไม่ใช่ key = team และ value a คือ redis เขาก็มี sytnx ของเขาแหละครับ จริงๆ ก็ไม่ใช่ -> ด้วยครับ เพราะมันไม่เครื่องหมายเลย เดี๋ยวบทสองเห็นภาพครับ
 
 ตัวอย่างนี้เป็นภาพรวมของข้อมูลใน Stream โดย ID ใช้เรียงลำดับรายการ โปรแกรมสามารถอ่าน Event ไปประมวลผล เช่น ส่งอีเมลหลังชำระเงิน และใช้ Consumer group เพื่อแบ่งงานให้หลาย Worker ได้
 

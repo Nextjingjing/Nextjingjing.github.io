@@ -168,5 +168,4 @@ SET name "mario"
 SET name "luigi" GET # "mario"
 ```
 
-
-{{< page-nav prev-link="/blogs/redis-101/01-redis/" next-link="/post/redis-101/" >}}
+{{< page-nav prev-link="/blogs/redis-101/01-redis/" next-link="/blogs/redis-101/03-sets-list-hash/" >}}

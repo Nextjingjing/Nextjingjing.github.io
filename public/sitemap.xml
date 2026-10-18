@@ -29,6 +29,9 @@
     <loc>http://localhost:1313/blogs/redis-101/01-redis/</loc>
     <lastmod>2026-10-13T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/blogs/redis-101/03-sets-list-hash/</loc>
+    <lastmod>2026-10-13T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/tags/backend/</loc>
     <lastmod>2026-04-29T00:00:00+00:00</lastmod>
   </url><url>

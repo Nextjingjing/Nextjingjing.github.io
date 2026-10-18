@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Sets, Lists and Hash">
+<title>Sets, Lists and Hash</title>
+
+
+<link rel="canonical" href="http://localhost:1313/blogs/redis-101/03-sets-list-hash/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
+
+
+<link rel="stylesheet" href="/scss/style.min.21ff10e2ccd84e3cbee232de0fc8bd82aad9270fd957210bb966b6c6bb8d64c6.css"><meta property='og:title' content="Sets, Lists and Hash">
+<meta property='og:description' content="Sets, Lists and Hash">
+<meta property='og:url' content='http://localhost:1313/blogs/redis-101/03-sets-list-hash/'>
+<meta property='og:site_name' content='Nextjingjing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Blogs' /><meta property='article:published_time' content='2026-10-13T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-10-13T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Sets, Lists and Hash">
+<meta name="twitter:description" content="Sets, Lists and Hash">
+    <link rel="shortcut icon" href="/img/profile.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        <figure class="site-avatar">
+                <a href="/">
+                    <img src="/img/profile.png" 
+                        width="860"
+                        height="1063"
+                        class="site-logo"
+                        loading="lazy"
+                        alt="Avatar">
+                </a>
+                
+                    <span class="emoji">😊</span>
+                
+            </figure>
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Nextjingjing</a></h1>
+            <h2 class="site-description">Hello, I&#39;m Nextjingjing. I&#39;m interested in Development and DevOps, and I love sharing my knowledge through blogging.</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://www.facebook.com/pruek.tanvorakul/'
+                        
+                        title="Facebook"
+                        rel="me"
+                    >
+                        
+                        
+                            <?xml version="1.0" encoding="utf-8"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect width="16" height="16" id="icon-bound" fill="none" />
+  <path d="M15.117,0H0.883C0.395,0,0,0.395,0,0.883v14.234C0,15.605,0.395,16,0.883,16h7.664V9.812H6.469V7.391h2.078V5.608 c0-2.067,1.262-3.192,3.106-3.192c0.883,0,1.642,0.066,1.863,0.095v2.16l-1.271,0.001c-1.003,0-1.197,0.477-1.197,1.176v1.543h2.398 l-0.312,2.422h-2.086V16h4.07C15.605,16,16,15.605,16,15.117V0.883C16,0.395,15.605,0,15.117,0z" />
+</svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/Nextjingjing'
+                        
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.instagram.com/next_pruek/'
+                        
+                        title="Instagram."
+                        rel="me"
+                    >
+                        
+                        
+                            <?xml version="1.0" ?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 32 32" id="Camada_1" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+</style>
+<path d="M6,2h20c2.2,0,4,1.8,4,4v20c0,2.2-1.8,4-4,4H6c-2.2,0-4-1.8-4-4V6C2,3.8,3.8,2,6,2z"/>
+<g>
+<path class="st0" d="M21.3,9.7c-0.6,0-1.2,0.5-1.2,1.2c0,0.7,0.5,1.2,1.2,1.2c0.7,0,1.2-0.5,1.2-1.2C22.4,10.2,21.9,9.7,21.3,9.7z"/>
+<path class="st0" d="M16,11.2c-2.7,0-4.9,2.2-4.9,4.9c0,2.7,2.2,4.9,4.9,4.9s4.9-2.2,4.9-4.9C21,13.4,18.8,11.2,16,11.2z M16,19.3   c-1.7,0-3.2-1.4-3.2-3.2c0-1.7,1.4-3.2,3.2-3.2c1.7,0,3.2,1.4,3.2,3.2C19.2,17.9,17.8,19.3,16,19.3z"/>
+<path class="st0" d="M20,6h-8c-3.3,0-6,2.7-6,6v8c0,3.3,2.7,6,6,6h8c3.3,0,6-2.7,6-6v-8C26,8.7,23.3,6,20,6z M24.1,20   c0,2.3-1.9,4.1-4.1,4.1h-8c-2.3,0-4.1-1.9-4.1-4.1v-8c0-2.3,1.9-4.1,4.1-4.1h8c2.3,0,4.1,1.9,4.1,4.1V20z"/>
+</g>
+</svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/about/' >
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/archives/' >
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/search/' >
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav class="toc-nav" id="TableOfContents">
+                
+  <ol>
+    <li><a href="#sets">Sets</a>
+      <ol>
+        <li><a href="#การสราง">การสร้าง</a></li>
+        <li><a href="#การอาน">การอ่าน</a></li>
+        <li><a href="#การเพม">การเพิ่ม</a>
+          <ol>
+            <li><a href="#ขอควรรการเพม">ข้อควรรู้การเพิ่ม</a></li>
+          </ol>
+        </li>
+        <li><a href="#การลบ">การลบ</a></li>
+        <li><a href="#การรวม-2-sets-ดวย-union">การรวม 2 sets ด้วย Union</a></li>
+        <li><a href="#เชความสมาชกตวใดๆ-ไหม-">เช็คว่ามีสมาชิกตัวใดๆ ไหม ?</a></li>
+        <li><a href="#คำสงอนๆ">คำสั่งอื่นๆ</a></li>
+        <li><a href="#ขอด">ข้อดี</a></li>
+        <li><a href="#ขอเสย">ข้อเสีย</a></li>
+        <li><a href="#time-complexity">Time complexity</a></li>
+      </ol>
+    </li>
+    <li><a href="#lists">Lists</a>
+      <ol>
+        <li><a href="#lpush">LPUSH</a></li>
+        <li><a href="#lrange">LRANGE</a></li>
+        <li><a href="#rpush">RPUSH</a></li>
+        <li><a href="#lpop-rpop">LPOP, RPOP</a></li>
+        <li><a href="#lindex">LINDEX</a></li>
+        <li><a href="#lpos">LPOS</a></li>
+        <li><a href="#ขอด-1">ข้อดี</a></li>
+        <li><a href="#ขอเสย-1">ข้อเสีย</a></li>
+        <li><a href="#time-complexity-1">Time complexity</a></li>
+      </ol>
+    </li>
+    <li><a href="#hash">Hash</a>
+      <ol>
+        <li><a href="#hset">HSET</a></li>
+        <li><a href="#hget">HGET</a></li>
+        <li><a href="#hkeys">HKEYS</a></li>
+        <li><a href="#hdel">HDEL</a></li>
+        <li><a href="#hexists">HEXISTS</a></li>
+      </ol>
+    </li>
+  </ol>
+
+            </nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+            
+            
+            <a href="/categories/blogs/" style="background-color: hsl(334, 60%, 84%); color: hsl(334, 60%, 15%);">
+                Blogs
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/blogs/redis-101/03-sets-list-hash/">Sets, Lists and Hash</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Sets, Lists and Hash
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    
+    
+    
+    <footer class="article-meta">
+        
+            <div class="inline-meta">
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                    <time class="article-time--published" datetime='2026-10-13T00:00:00Z'>Tuesday, October 13, 2026</time>
+                
+
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                    <time class="article-time--reading">
+                        4 minutes read
+                    </time>
+                
+            </div>
+        
+
+        
+
+        
+    </footer>
+    
+</div>
+
+</header>
+
+    
+    <aside class="article-toc">
+        <details>
+            <summary>
+                <div class="article-toc-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
+                    <span>Table of contents</span>
+                </div>
+            </summary>
+            <nav class="toc-nav">
+                
+  <ol>
+    <li><a href="#sets">Sets</a>
+      <ol>
+        <li><a href="#การสราง">การสร้าง</a></li>
+        <li><a href="#การอาน">การอ่าน</a></li>
+        <li><a href="#การเพม">การเพิ่ม</a>
+          <ol>
+            <li><a href="#ขอควรรการเพม">ข้อควรรู้การเพิ่ม</a></li>
+          </ol>
+        </li>
+        <li><a href="#การลบ">การลบ</a></li>
+        <li><a href="#การรวม-2-sets-ดวย-union">การรวม 2 sets ด้วย Union</a></li>
+        <li><a href="#เชความสมาชกตวใดๆ-ไหม-">เช็คว่ามีสมาชิกตัวใดๆ ไหม ?</a></li>
+        <li><a href="#คำสงอนๆ">คำสั่งอื่นๆ</a></li>
+        <li><a href="#ขอด">ข้อดี</a></li>
+        <li><a href="#ขอเสย">ข้อเสีย</a></li>
+        <li><a href="#time-complexity">Time complexity</a></li>
+      </ol>
+    </li>
+    <li><a href="#lists">Lists</a>
+      <ol>
+        <li><a href="#lpush">LPUSH</a></li>
+        <li><a href="#lrange">LRANGE</a></li>
+        <li><a href="#rpush">RPUSH</a></li>
+        <li><a href="#lpop-rpop">LPOP, RPOP</a></li>
+        <li><a href="#lindex">LINDEX</a></li>
+        <li><a href="#lpos">LPOS</a></li>
+        <li><a href="#ขอด-1">ข้อดี</a></li>
+        <li><a href="#ขอเสย-1">ข้อเสีย</a></li>
+        <li><a href="#time-complexity-1">Time complexity</a></li>
+      </ol>
+    </li>
+    <li><a href="#hash">Hash</a>
+      <ol>
+        <li><a href="#hset">HSET</a></li>
+        <li><a href="#hget">HGET</a></li>
+        <li><a href="#hkeys">HKEYS</a></li>
+        <li><a href="#hdel">HDEL</a></li>
+        <li><a href="#hexists">HEXISTS</a></li>
+      </ol>
+    </li>
+  </ol>
+
+            </nav>
+        </details>
+    </aside>
+    
+
+    <section class="article-content">
+    
+    
+    <h2 id="sets">Sets
+</h2><p>จากบทที่ 1 เราได้เห็นว่ามันมี Data type ตัวหนึ่งที่เราได้คำอธิบายไปว่า</p>
+<ul>
+<li>สมาชิกใน sets ต้องไม่ซ้ำ</li>
+<li>ไม่มีลำดับ</li>
+</ul>
+<h3 id="การสราง">การสร้าง
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">SADD names mario luigi peach
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="การอาน">การอ่าน
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">SMEMBERS names
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="การเพม">การเพิ่ม
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">SADD names yoshi
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>เช่น</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; SADD names mario luigi peach
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">3</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; SMEMBERS names
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;mario&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;luigi&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;peach&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; SADD names yoshi
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; SMEMBERS names
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;mario&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;luigi&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;peach&#34;</span>
+</span></span><span class="line"><span class="cl">4<span class="o">)</span> <span class="s2">&#34;yoshi&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="ขอควรรการเพม">ข้อควรรู้การเพิ่ม
+</h4><p>สมาชิกใน sets ห้ามซ้ำกัน</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; SMEMBERS names
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;mario&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;luigi&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;peach&#34;</span>
+</span></span><span class="line"><span class="cl">4<span class="o">)</span> <span class="s2">&#34;yoshi&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; SADD names yoshi
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; SMEMBERS names
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;mario&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;luigi&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;peach&#34;</span>
+</span></span><span class="line"><span class="cl">4<span class="o">)</span> <span class="s2">&#34;yoshi&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="การลบ">การลบ
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">SREM names luigi
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="การรวม-2-sets-ดวย-union">การรวม 2 sets ด้วย Union
+</h3><p>สมมุติมีสองเซ็ต แล้วอยากรวมเป็น 1 ด้วยการ Union</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; SADD team:a mario luigi
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; SADD team:b luigi peach
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; SUNION team:a team:b
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;peach&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;luigi&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;mario&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="เชความสมาชกตวใดๆ-ไหม-">เช็คว่ามีสมาชิกตัวใดๆ ไหม ?
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">SADD team:a mario luigi
+</span></span><span class="line"><span class="cl">SISMEMBER team:a mario # 1 ถ้ามี 0 ถ้าไม่มี
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="คำสงอนๆ">คำสั่งอื่นๆ
+</h3><ul>
+<li><code>SINTER team:a team:b</code> คืนค่าสสมาชิกที่ซ้ำกัน</li>
+<li><code>SDIFF team:a team:b</code> คืนค่าตัวที่มีไม่ซ้ำกัน</li>
+</ul>
+<h3 id="ขอด">ข้อดี
+</h3><ul>
+<li>สมาชิกไม่ซ้ำกัน เพิ่มสมาชิกซ้ำก็ไม่ทำให้มีตัวซ้ำ</li>
+<li>เช็กสมาชิก เพิ่ม และลบสมาชิกได้รวดเร็ว</li>
+</ul>
+<h3 id="ขอเสย">ข้อเสีย
+</h3><ul>
+<li>ไม่มีลำดับ</li>
+<li>ดึงสมาชิกทั้งหมด ได้ช้ากว่า Data ตัวอื่นๆ</li>
+</ul>
+<h3 id="time-complexity">Time complexity
+</h3><ul>
+<li>เพิ่มสมาชิก <code>SADD</code> — O(1)</li>
+<li>เช็กสมาชิก <code>SISMEMBER</code> — O(1)</li>
+<li>ลบสมาชิก <code>SREM</code> — O(N)</li>
+<li>รวม Set <code>SUNION</code> — O(N)</li>
+<li>หาจุดร่วม <code>SINTER</code> — O(N × M)</li>
+<li>หาส่วนต่าง <code>SDIFF</code> — O(N)</li>
+<li>ดึงสมาชิกทั้งหมด <code>SMEMBERS</code> — O(N)</li>
+</ul>
+<h2 id="lists">Lists
+</h2><p>เป็นกลุ่มของข้อมูลคล้ายๆ Sets แต่จุดต่างคือมีลำดับแน่นอน เช่น Toad, Yoshi, Mario, Peach แต่ให้ดึงมากี่ครั้งก็จะได้ลำดับตามนี้เสมอ</p>
+
+    <blockquote>
+        <p>ไม่ใช่ Array มันคือ Linked lists เข้าถึงข้อมูลตัวแรก และตัวท้ายเร็ว แต่นอกนั้นเข้า นอกนั้น O(n)</p>
+
+    </blockquote>
+<h3 id="lpush">LPUSH
+</h3><ul>
+<li>ใช้สร้าง List</li>
+<li>เพิ่มสมาชิกตาม Key โดยเป็นการเพิ่มทางซ้าย ของ List</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; LPUSH students john jane 
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LPUSH students peter
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">3</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> -1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;peter&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="lrange">LRANGE
+</h3><p>ใช้เพื่ออ่านข้อมูล เช่น</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> -1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;peter&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;peter&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> <span class="m">999</span>
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;peter&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="rpush">RPUSH
+</h3><ul>
+<li>คล้ายๆ LPUSH แต่เพิ่มทางขวา</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; RPUSH users john
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; RPUSH users jane
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE users <span class="m">0</span> -1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="lpop-rpop">LPOP, RPOP
+</h3><ul>
+<li>เอาข้อมูลออกจาก List
+<ul>
+<li>LPOP คือเอาออกจากทางซ้าย</li>
+<li>RPOP คือเอาออกจากทางขวา</li>
+<li><code>LPOP key count</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> -1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;peter&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LPOP students <span class="m">1</span>
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;peter&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> -1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; RPOP students <span class="m">1</span>
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> -1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="lindex">LINDEX
+</h3><ul>
+<li>เข้าถึงสมาชิกตัวที่ index</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> -1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span><span class="line"><span class="cl">4<span class="o">)</span> <span class="s2">&#34;jimmy&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LINDEX students <span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;john&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="lpos">LPOS
+</h3><ul>
+<li>หาว่ามีสมาชิกตัวนี้ไหม</li>
+<li>และถ้าหาเจออยู่ที่ index ไหน
+<ul>
+<li>หากไม่เจอ return nil</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; LRANGE students <span class="m">0</span> -1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;jane&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;john&#34;</span>
+</span></span><span class="line"><span class="cl">4<span class="o">)</span> <span class="s2">&#34;jimmy&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LPOS students jimmy
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">3</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; LPOS students UNKOWN
+</span></span><span class="line"><span class="cl"><span class="o">(</span>nil<span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="ขอด-1">ข้อดี
+</h3><ul>
+<li>เก็บข้อมูลแบบมีลำดับ เพิ่มและนำข้อมูลออกจากหัวหรือท้าย List ได้รวดเร็ว</li>
+<li>เหมาะกับงานแบบคิว (queue) หรือสแตก (stack) เช่น งานที่รอประมวลผล</li>
+<li>เก็บสมาชิกซ้ำกันได้</li>
+</ul>
+<h3 id="ขอเสย-1">ข้อเสีย
+</h3><ul>
+<li>ค้นหาสมาชิกหรือเข้าถึงตำแหน่งกลางๆ ต้องไล่ดูสมาชิก จึงใช้เวลาเพิ่มตามขนาด List</li>
+<li>ถ้าต้องอ่านข้อมูลจำนวนมาก คำสั่งจะใช้เวลาตามจำนวนข้อมูลที่อ่าน</li>
+<li>ไม่เหมาะกับกรณีที่ต้องค้นหาค่าหรือเข้าถึงตำแหน่งใดตำแหน่งหนึ่งบ่อยๆ</li>
+</ul>
+<h3 id="time-complexity-1">Time complexity
+</h3><ul>
+<li>เพิ่มที่หัว <code>LPUSH</code> / เพิ่มที่ท้าย <code>RPUSH</code> — O(1) ต่อสมาชิกที่เพิ่ม; ถ้าเพิ่มหลายสมาชิกเป็น O(M) โดย M คือจำนวนสมาชิกที่ส่งเข้าไป</li>
+<li>นำออกจากหัว <code>LPOP</code> / นำออกจากท้าย <code>RPOP</code> — O(1) ต่อสมาชิกที่นำออก; เมื่อใช้ <code>count</code> เป็น O(M)</li>
+<li>อ่านช่วง <code>LRANGE</code> — O(S + M), S คือระยะที่ต้องไล่ไปยังจุดเริ่มต้น และ M คือจำนวนสมาชิกที่ส่งคืน</li>
+<li>อ่านตาม index <code>LINDEX</code> — O(N) ตามจำนวนสมาชิกที่ต้องไล่ผ่าน; อ่านหัวหรือท้ายเป็น O(1)</li>
+<li>ค้นหาตำแหน่ง <code>LPOS</code> — O(N) ในกรณีแย่ที่สุด</li>
+<li>นับจำนวนสมาชิก <code>LLEN</code> — O(1)</li>
+</ul>
+<h2 id="hash">Hash
+</h2><p>จริงๆ มันก็คือ Hash map ที่เด็กวิศวะคอม/วิทย์คอมได้เรียนมานั้นแหละครับ</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">book:1 -&gt; {
+</span></span><span class="line"><span class="cl">  title -&gt; Name of this wind
+</span></span><span class="line"><span class="cl">  author -&gt; Patrick Rothfuss
+</span></span><span class="line"><span class="cl">  rating -&gt; 5
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+    <blockquote>
+        <p>ขอบอกไว้ก่อนนะครับว่า book:1 เป็น key นะครับ อาจจะนิยมใช้เป็น book:<em><strong>id</strong></em> กันครับ</p>
+
+    </blockquote>
+<p>โดยศัพท์ที่เราจะใช้มีดังนี้</p>
+<ul>
+<li>Key หากมองจากตัวอย่างข้างบนมันคือ <code>book:1</code></li>
+<li>Field หากมองตัวอย่างด้านบนได้แก่ <code>title, author, rating</code></li>
+<li>Value หากมองตัวอย่างข้างบนได้แก่ <code>Name of this wind, Patrick , 5</code></li>
+</ul>
+<h3 id="hset">HSET
+</h3><ul>
+<li>ใช้สร้าง Hashmap</li>
+<li>เพิ่มสมาชิก</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt;  HSET book:1 title <span class="s2">&#34;The Name of the Wind&#34;</span> author <span class="s2">&#34;Patrick Rothfuss&#34;</span> rating <span class="s2">&#34;5&#34;</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; HSET book:1 price <span class="s2">&#34;500</span>$<span class="s2">&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">book:1 -&gt; {
+</span></span><span class="line"><span class="cl">  title -&gt; Name of this wind
+</span></span><span class="line"><span class="cl">  author -&gt; Patrick Rothfuss
+</span></span><span class="line"><span class="cl">  rating -&gt; 5
+</span></span><span class="line"><span class="cl">  price -&gt; &#34;500$&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="hget">HGET
+</h3><ul>
+<li>ใช้หยิบสมาชิกตาม field</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">book:1 -&gt; {
+</span></span><span class="line"><span class="cl">  title -&gt; Name of this wind
+</span></span><span class="line"><span class="cl">  author -&gt; Patrick Rothfuss
+</span></span><span class="line"><span class="cl">  rating -&gt; 5
+</span></span><span class="line"><span class="cl">  price -&gt; &#34;500$&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; HGET book:1 price
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;500</span>$<span class="s2">&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="hkeys">HKEYS
+</h3><ul>
+<li>ใช้เพื่อดูว่ามี Fields อะไรบ้าง ?</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">book:1 -&gt; {
+</span></span><span class="line"><span class="cl">  title -&gt; Name of this wind
+</span></span><span class="line"><span class="cl">  author -&gt; Patrick Rothfuss
+</span></span><span class="line"><span class="cl">  rating -&gt; 5
+</span></span><span class="line"><span class="cl">  price -&gt; &#34;500$&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>จะได้ว่า</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; HKEYS book:1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;title&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;author&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;rating&#34;</span>
+</span></span><span class="line"><span class="cl">4<span class="o">)</span> <span class="s2">&#34;price&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="hdel">HDEL
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">book:1 -&gt; {
+</span></span><span class="line"><span class="cl">  title -&gt; Name of this wind
+</span></span><span class="line"><span class="cl">  author -&gt; Patrick Rothfuss
+</span></span><span class="line"><span class="cl">  rating -&gt; 5
+</span></span><span class="line"><span class="cl">  price -&gt; &#34;500$&#34;
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>จะได้ว่า</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; HDEL book:1 price
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl">127.0.0.1:6379&gt; HKEYS book:1
+</span></span><span class="line"><span class="cl">1<span class="o">)</span> <span class="s2">&#34;title&#34;</span>
+</span></span><span class="line"><span class="cl">2<span class="o">)</span> <span class="s2">&#34;author&#34;</span>
+</span></span><span class="line"><span class="cl">3<span class="o">)</span> <span class="s2">&#34;rating&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="hexists">HEXISTS
+</h3><ul>
+<li>ใช้เช็คว่ามี field นี้หรือไม่ ?</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">127.0.0.1:6379&gt; HEXISTS book:1 title
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">1</span> <span class="c1"># Exist </span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>integer<span class="o">)</span> <span class="m">0</span> <span class="c1"># Non-exist</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        
+        <a href="/blogs/redis-101/02-basic-command/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;">
+            ← หน้าก่อนหน้า
+        </a>
+        
+    </div>
+
+    <div>
+        
+        <a href="/post/redis-101/" style="background-color: var(--card-background); border: 1px solid var(--main-border-color); padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--card-text-color); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block;">
+            ตอนถัดไป →
+        </a>
+        
+    </div>
+</div>
+
+</section>
+
+
+    <footer class="article-meta article-footer">
+    
+
+    
+    <section class="article-copyright inline-meta">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under <a class="link" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"  target="_blank" rel="noopener"
+    >CC BY-NC-SA 4.0</a></span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside>
+    <h2 class="section-title">Related content</h2>
+    <div class="subsection-list">
+        <div class="article-list--tile">
+            
+                
+<article class="">
+    <a href="/blogs/redis-101/02-basic-command/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Basic command</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/redis-101/01-redis/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Redis คืออะไร</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/07-api-gateway/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 7 API Gateway</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/06-event-sourcing/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 6 การเก็บประวัติของเหตุการณ์ต่างๆ ด้วย Event sourcing</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/blogs/microservice/05-ddd/">
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Microservice ตอนที่ 5 การออกแบบ Business logic และ Service ด้วย Domain Driven Design</h2>
+        </div>
+    </a>
+</article>
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2026 Nextjingjing
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="4.0.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+
+
+
+<script type="module">
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script>
+    
+
+            </main>
+        </div>
+        
+<script type="text/javascript" src="/ts/main.6c41968bbd41e2121913983fb4f3e0b5a06fee57e07d36a5c65adf9c17266350.js" defer></script>
+
+
+    </body>
+</html>
